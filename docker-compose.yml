@@ -1,0 +1,7 @@
+version: '2'
+services:
+  database:
+    container_name: pg
+    image: postgres:9.5.3
+    ports:
+      - "5432:5432"
