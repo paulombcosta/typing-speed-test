@@ -8948,7 +8948,8 @@ var _user$project$App$wordsToHTML = function (words) {
 							_elm_lang$core$Native_List.fromArray(
 								[
 									_user$project$App$getWordStyle(w)
-								]))
+								])),
+							_elm_lang$html$Html_Attributes$class('typingText')
 						]),
 					_elm_lang$core$Native_List.fromArray(
 						[
@@ -8976,6 +8977,40 @@ var _user$project$App$createWordWithUpdatedStatus = F3(
 				typedText: _user$project$App$arrayToString(typedText)
 			});
 	});
+var _user$project$App$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$class('root')
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('typing')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_user$project$App$wordsToHTML(model.currentWords)),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text(
+								_user$project$App$arrayToString(model.currentTypedChars))
+							]))
+					]))
+			]));
+};
 var _user$project$App$hardcodedWordRepository = _elm_lang$core$Array$fromList(
 	_elm_lang$core$Native_List.fromArray(
 		['end', 'start', 'much', 'dark', 'better']));
@@ -9008,7 +9043,6 @@ var _user$project$App$Model = F6(
 		return {wordsRepository: a, evaluatedWords: b, currentWords: c, currentTypedChars: d, applicationStatus: e, currentPosition: f};
 	});
 var _user$project$App$Finished = {ctor: 'Finished'};
-var _user$project$App$NotStarted = {ctor: 'NotStarted'};
 var _user$project$App$Started = {ctor: 'Started'};
 var _user$project$App$TypedIncorrectly = {ctor: 'TypedIncorrectly'};
 var _user$project$App$TypedCorrectly = {ctor: 'TypedCorrectly'};
@@ -9094,83 +9128,24 @@ var _user$project$App$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'KeyTyped':
+			default:
 				var _p4 = _p3._0;
 				var keyPressed = A2(
 					_elm_lang$core$Debug$log,
 					'KeyCode pressed',
 					_elm_lang$core$Basics$toString(_p4));
-				if (_elm_lang$core$Native_Utils.eq(model.applicationStatus, _user$project$App$NotStarted)) {
-					return A2(
-						_elm_lang$core$Debug$log,
-						'Application not started, ignoring ',
-						{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none});
+				if ((_elm_lang$core$Native_Utils.cmp(_p4, _user$project$App$upperCaseA) > -1) && (_elm_lang$core$Native_Utils.cmp(_p4, _user$project$App$lowerCaseZ) < 1)) {
+					return A2(_user$project$App$updateCurrentTypedWords, _p4, model);
 				} else {
-					if ((_elm_lang$core$Native_Utils.cmp(_p4, _user$project$App$upperCaseA) > -1) && (_elm_lang$core$Native_Utils.cmp(_p4, _user$project$App$lowerCaseZ) < 1)) {
-						return A2(_user$project$App$updateCurrentTypedWords, _p4, model);
+					if (_elm_lang$core$Native_Utils.eq(_p4, _user$project$App$spaceKey)) {
+						var modelStatus = A2(_elm_lang$core$Debug$log, 'Current model after space pressed', model);
+						return _user$project$App$updateWordStatus(model);
 					} else {
-						if (_elm_lang$core$Native_Utils.eq(_p4, _user$project$App$spaceKey)) {
-							var modelStatus = A2(_elm_lang$core$Debug$log, 'Current model after space pressed', model);
-							return _user$project$App$updateWordStatus(model);
-						} else {
-							return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-						}
+						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 					}
 				}
-			default:
-				return A2(
-					_elm_lang$core$Debug$log,
-					'Starting app ',
-					{
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{applicationStatus: _user$project$App$Started}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					});
 		}
 	});
-var _user$project$App$StartTest = {ctor: 'StartTest'};
-var _user$project$App$view = function (model) {
-	return A2(
-		_elm_lang$html$Html$div,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_user$project$App$wordsToHTML(model.currentWords)),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(
-						_user$project$App$arrayToString(model.currentTypedChars))
-					])),
-				A2(
-				_elm_lang$html$Html$div,
-				_elm_lang$core$Native_List.fromArray(
-					[]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						A2(
-						_elm_lang$html$Html$button,
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html_Events$onClick(_user$project$App$StartTest)
-							]),
-						_elm_lang$core$Native_List.fromArray(
-							[
-								_elm_lang$html$Html$text('Start!!')
-							]))
-					]))
-			]));
-};
 var _user$project$App$KeyTyped = function (a) {
 	return {ctor: 'KeyTyped', _0: a};
 };
@@ -9192,7 +9167,7 @@ var _user$project$App$init = {
 		currentWords: _elm_lang$core$Array$fromList(
 			_elm_lang$core$Native_List.fromArray(
 				[])),
-		applicationStatus: _user$project$App$NotStarted,
+		applicationStatus: _user$project$App$Started,
 		currentPosition: 0
 	},
 	_1: A3(
@@ -9201,8 +9176,8 @@ var _user$project$App$init = {
 			return _elm_lang$core$Native_Utils.crash(
 				'App',
 				{
-					start: {line: 79, column: 27},
-					end: {line: 79, column: 32}
+					start: {line: 76, column: 27},
+					end: {line: 76, column: 32}
 				})('');
 		},
 		function (time) {

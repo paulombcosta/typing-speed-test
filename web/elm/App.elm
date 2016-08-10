@@ -1,7 +1,7 @@
 module App exposing (..)
 
 import Html exposing (div, Html, text, button)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, class)
 import Html.Events exposing (onClick)
 import List exposing (..)
 import Html.App
@@ -17,16 +17,13 @@ import String exposing (fromChar)
 
 type alias Word =
     { text : String
-    -- , position : Int
     , typedText : String
-    -- , currentSeed : Seed
     , wordStatus : WordStatus
     }
 
 
 type ApplicationStatus
     = Started
-    | NotStarted
     | Finished
 
 type WordStatus
@@ -73,7 +70,7 @@ init =
       , evaluatedWords = []
       , currentTypedChars = fromList []
       , currentWords = fromList []
-      , applicationStatus = NotStarted
+      , applicationStatus = Started
       , currentPosition = 0
       }
     , Task.perform (\_ -> crash "") (\time -> TimeForInitialSeed time) Time.now
@@ -88,7 +85,6 @@ type Msg
     = NoOp
     | TimeForInitialSeed Time
     | KeyTyped Keyboard.KeyCode
-    | StartTest
 
 
 
@@ -97,11 +93,14 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ div [] (wordsToHTML (model.currentWords))
-        , div [] [ (text (arrayToString model.currentTypedChars)) ]
-        , div [] [ button [ onClick StartTest ] [ text "Start!!" ] ]
-        ]
+  div [ class "root"]
+      [ div [ class "typing"]
+            [
+               div [] (wordsToHTML (model.currentWords))
+             , div [] [ (text (arrayToString model.currentTypedChars)) ]
+             ]
+            ]
+
 
 
 arrayToString : Array String -> String
@@ -112,7 +111,10 @@ arrayToString array =
 wordsToHTML : Array Word -> List (Html.Html Msg)
 wordsToHTML words =
     words |> Array.map (\w -> div
-    [style [ getWordStyle w ] ]
+    [
+        style [ getWordStyle w ]
+      , class "typingText"
+    ]
     [ text w.text ])
     |> toList
 
@@ -143,9 +145,7 @@ update msg model =
                 keyPressed =
                     log "KeyCode pressed" (toString key)
             in
-                if (model.applicationStatus == NotStarted) then
-                    log "Application not started, ignoring " ( model, Cmd.none )
-                else if (key >= upperCaseA && key <= lowerCaseZ) then
+                if (key >= upperCaseA && key <= lowerCaseZ) then
                     updateCurrentTypedWords key model
                 else if (key == spaceKey) then
                     let
@@ -155,8 +155,6 @@ update msg model =
                 else
                     ( model, Cmd.none )
 
-        StartTest ->
-            log "Starting app " ( { model | applicationStatus = Started }, Cmd.none )
 
 updateWordStatus : Model -> (Model, Cmd Msg)
 updateWordStatus model =

@@ -1,1 +1,27 @@
 /* This file is for your main application css. */
+.root {
+    background-color: black;
+    position: relative;
+}
+
+html, body, .root, .app-container, #elm-container, #main {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.typing {
+    background-color: white;
+    position: absolute;
+    height: 200px;
+    width: 500px;
+    margin: -100px 0 0 -200px;
+    top: 40%;
+    left: 50%;
+}
+
+.typingText {
+    font-size: 40px;
+    float: left;
+    margin: 3px 3px 3px 3px;
+}

@@ -12,9 +12,9 @@
   </head>
 
   <body>
-    <div class="container">
+    <div class="app-container">
 
-      <main role="main">
+      <main role="main" id="main">
         <%= render @view_module, @view_template, assigns %>
       </main>
 
