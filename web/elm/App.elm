@@ -56,7 +56,8 @@ upperCaseA =
 lowerCaseZ =
     122
 
-
+initalWordNumber =
+    15
 
 
 hardcodedWordRepository : Array String
@@ -138,7 +139,7 @@ update msg model =
             ( model, Cmd.none )
 
         TimeForInitialSeed time ->
-            ( { model | currentWords = fromList (randomWords 5 (initialSeed (truncate (inMilliseconds time)))) }, Cmd.none )
+            ( { model | currentWords = fromList (randomWords initalWordNumber (initalSeedFromTime time) []) }, Cmd.none )
 
         KeyTyped key ->
             let
@@ -154,6 +155,10 @@ update msg model =
                         updateWordStatus model
                 else
                     ( model, Cmd.none )
+
+initalSeedFromTime : Time -> Seed
+initalSeedFromTime time =
+    initialSeed (truncate (inMilliseconds time))
 
 
 updateWordStatus : Model -> (Model, Cmd Msg)
@@ -195,17 +200,19 @@ updateCurrentTypedWords keycode model =
     ( { model | currentTypedChars = push (fromChar (fromCode keycode)) model.currentTypedChars }, Cmd.none )
 
 
-randomWords : Int -> Seed -> List Word
-randomWords num seed =
-    randomInts num seed |> List.map (\i -> get i hardcodedWordRepository) |> List.map extractText |> List.map createWord
+randomWords : Int -> Seed -> List Word -> List Word
+randomWords num seed acc =
+    let
+        arrayPosition = step (int 0 (Array.length hardcodedWordRepository)) seed
+        nextWord = createWord (extractText (get (fst arrayPosition) hardcodedWordRepository))
+    in
+        if (List.length acc == num) then
+          acc
+        else
+          randomWords num (snd arrayPosition) (acc ++ [nextWord])
 
 createWord : String -> Word
 createWord wordText = { text = wordText, wordStatus = Unevaluated, typedText = "" }
-
-randomInts : Int -> Seed -> List Int
-randomInts num seed =
-    log "ints " (fst (step (list num (int 0 (Array.length hardcodedWordRepository - 1))) seed))
-
 
 extractText : Maybe String -> String
 extractText maybeWord =
