@@ -203,7 +203,7 @@ updateCurrentTypedWords keycode model =
 randomWords : Int -> Seed -> List Word -> List Word
 randomWords num seed acc =
     let
-        arrayPosition = step (int 0 (Array.length hardcodedWordRepository)) seed
+        arrayPosition = step (int 0 (Array.length hardcodedWordRepository - 1)) seed
         nextWord = createWord (extractText (get (fst arrayPosition) hardcodedWordRepository))
     in
         if (List.length acc == num) then
