@@ -36,8 +36,7 @@ type alias WordRepository =
 
 
 type alias Model =
-    { wordsRepository : WordRepository
-    , evaluatedWords : List Word
+    { evaluatedWords : List Word
     , currentWords : Array Word
     , currentTypedChars : Array String
     , applicationStatus : ApplicationStatus
@@ -67,8 +66,7 @@ hardcodedWordRepository =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { wordsRepository = hardcodedWordRepository
-      , evaluatedWords = []
+    ( { evaluatedWords = []
       , currentTypedChars = fromList []
       , currentWords = fromList []
       , applicationStatus = Started
