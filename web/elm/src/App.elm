@@ -1,19 +1,21 @@
 module App exposing (..)
 
 import Html exposing (div, Html, text, button)
-import Html.Attributes exposing (style, class)
+import Html.Attributes exposing (style, class, id)
 import Html.Events exposing (onClick)
 import List exposing (..)
 import Html.App
 import Keyboard
 import Random exposing (Seed, initialSeed, step, int, list)
 import Debug exposing (log, crash)
-import Array exposing (Array, length, get, fromList, toList, push, set)
+import Array exposing (Array, length, get, fromList, toList, push, set, indexedMap)
 import Time exposing (now, inMilliseconds, Time)
 import Task exposing (perform)
 import Char exposing (fromCode, toCode)
 import String exposing (fromChar)
 
+-- scrolltop : changes the position in the view
+-- getBoundClientRect : gets the boundaries of the view
 
 type alias Word =
     { text : String
@@ -56,7 +58,7 @@ lowerCaseZ =
     122
 
 initalWordNumber =
-    15
+    40
 
 
 hardcodedWordRepository : Array String
@@ -93,12 +95,13 @@ type Msg
 view : Model -> Html Msg
 view model =
   div [ class "root"]
-      [ div [ class "typing"]
-            [
-               div [] (wordsToHTML (model.currentWords))
-             , div [] [ (text (arrayToString model.currentTypedChars)) ]
-             ]
-            ]
+      [ div
+          [ class "typing"]
+          [
+              div [] (wordsToHTML (model.currentWords))
+            , div [] [ (text (arrayToString model.currentTypedChars)) ]
+          ]
+      ]
 
 
 
@@ -109,12 +112,13 @@ arrayToString array =
 
 wordsToHTML : Array Word -> List (Html.Html Msg)
 wordsToHTML words =
-    words |> Array.map (\w -> div
+    words |> Array.indexedMap (\idx word -> div
     [
-        style [ getWordStyle w ]
-      , class "typingText"
+        style [ getWordStyle word ]
+      , class "word"
+      , id ("word-" ++ (toString idx))
     ]
-    [ text w.text ])
+    [ text word.text ])
     |> toList
 
 getWordStyle : Word -> (String, String)

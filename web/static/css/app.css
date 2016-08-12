@@ -18,9 +18,10 @@ html, body, .root, .app-container, #elm-container, #main {
     margin: -100px 0 0 -200px;
     top: 40%;
     left: 50%;
+    overflow: hidden;
 }
 
-.typingText {
+.word {
     font-size: 40px;
     float: left;
     margin: 3px 3px 3px 3px;
