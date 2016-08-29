@@ -73,16 +73,5 @@ header model =
       ]
       [ Layout.title [] [ text "Typing Test" ]
       , Layout.spacer
-      , Layout.navigation []
-          [ Layout.link
-              [ Layout.onClick NoOp ]
-              [ Icon.i "photo" ]
-          , Layout.link
-              [ Layout.href "https://github.com/debois/elm-mdl"]
-              [ span [] [text "github"] ]
-          , Layout.link
-              [ Layout.href "http://package.elm-lang.org/packages/debois/elm-mdl/latest/" ]
-              [ text "elm-package" ]
-          ]
       ]
   ]
