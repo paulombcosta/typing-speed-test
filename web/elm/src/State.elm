@@ -73,7 +73,10 @@ update msg model =
                     let
                         modelStatus = log "Current model after space pressed" model
                     in
-                        updateWordStatus model
+                       updateWordStatus model
+                       |> verifyNewWordsNeeded
+                       |> wrapModelInCmd
+
                 else
                     ( model, Cmd.none )
 
@@ -82,6 +85,9 @@ update msg model =
               materialUpdateLog = log "Material Update" ""
           in
               Material.update msg model
+
+wrapModelInCmd : Model -> (Model, Cmd Msg)
+wrapModelInCmd model = (model, Cmd.none)
 
 updateCurrentTypedWords : Int -> Model -> ( Model, Cmd Msg )
 updateCurrentTypedWords keycode model =
@@ -114,18 +120,26 @@ extractText maybeWord =
         Nothing ->
             ""
 
-updateWordStatus : Model -> (Model, Cmd Msg)
+updateWordStatus : Model -> Model
 updateWordStatus model =
     let
         currentWord = log "updateWordStatus extractWord = " (extractWord (Array.get model.currentPosition model.currentWords))
         currentWordStatus = log "updateWordStatus currentWordStatus = " (resolveWordStatus currentWord.text model.currentTypedChars)
         updatedWord = log "updateWordStatus updatedWord" (createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus)
     in
-        ({ model | currentTypedChars = fromList [""]
+        { model | currentTypedChars = fromList [""]
           , currentWords = set model.currentPosition updatedWord model.currentWords
           , currentPosition = model.currentPosition + 1 }
-          , Cmd.none )
 
+verifyNewWordsNeeded : Model -> Model
+verifyNewWordsNeeded model =
+    let
+        remainingWordsToEvaluate = Array.length model.currentWords - (model.currentPosition + 1)
+    in
+        if (remainingWordsToEvaluate == 0) then
+            { model | currentWords = Array.append (fromList []) model.currentWords  }
+        else
+            model
 
 resolveWordStatus : String -> Array String -> WordStatus
 resolveWordStatus originalText typedTextArray =
