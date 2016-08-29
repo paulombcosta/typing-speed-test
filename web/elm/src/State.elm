@@ -78,7 +78,10 @@ update msg model =
                     ( model, Cmd.none )
 
         Mdl msg ->
-          Material.update msg model
+          let
+              materialUpdateLog = log "Material Update" ""
+          in
+              Material.update msg model
 
 updateCurrentTypedWords : Int -> Model -> ( Model, Cmd Msg )
 updateCurrentTypedWords keycode model =
