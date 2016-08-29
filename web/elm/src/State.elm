@@ -12,6 +12,8 @@ import Task exposing (perform)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Types exposing (..)
+import Material
+import Material.Layout as Layout
 
 spaceKey =
     32
@@ -39,9 +41,16 @@ initalState =
       , currentWords = fromList []
       , applicationStatus = Started
       , currentPosition = 0
+      , mdl = Layout.setTabsWidth 2124 Material.model
       }
-    , Task.perform (\_ -> crash "") (\time -> TimeForInitialSeed time) Time.now
+    , Cmd.batch [timeForInitialSeed, materialInit]
     )
+
+timeForInitialSeed : Cmd Msg
+timeForInitialSeed = Task.perform (\_ -> crash "") (\time -> TimeForInitialSeed time) Time.now
+
+materialInit : Cmd Msg
+materialInit = Material.init Mdl
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,6 +76,9 @@ update msg model =
                         updateWordStatus model
                 else
                     ( model, Cmd.none )
+
+        Mdl msg ->
+          Material.update msg model
 
 updateCurrentTypedWords : Int -> Model -> ( Model, Cmd Msg )
 updateCurrentTypedWords keycode model =

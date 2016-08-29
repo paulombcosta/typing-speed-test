@@ -3,6 +3,7 @@ module Types exposing (..)
 import Array exposing (Array)
 import Time exposing (Time)
 import Keyboard
+import Material
 
 type alias Word =
     { text : String
@@ -14,6 +15,7 @@ type Msg
     = NoOp
     | TimeForInitialSeed Time
     | KeyTyped Keyboard.KeyCode
+    | Mdl (Material.Msg Msg)
 
 
 type ApplicationStatus
@@ -37,4 +39,5 @@ type alias Model =
     , currentTypedChars : Array String
     , applicationStatus : ApplicationStatus
     , currentPosition : Int
+    , mdl : Material.Model
     }

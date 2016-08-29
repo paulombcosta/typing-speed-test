@@ -1,6 +1,5 @@
 /* This file is for your main application css. */
 .root {
-    background-color: black;
     position: relative;
 }
 
@@ -15,8 +14,8 @@ html, body, .root, .app-container, #elm-container, #main {
     position: absolute;
     height: 200px;
     width: 500px;
-    margin: -100px 0 0 -200px;
-    top: 40%;
+    margin: 100px 0 0 -200px;
+    top: 45%;
     left: 50%;
     overflow: hidden;
 }
