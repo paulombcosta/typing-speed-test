@@ -14,6 +14,7 @@ import String exposing (fromChar)
 import Types exposing (..)
 import Material
 import Material.Layout as Layout
+import Bounds exposing (get)
 
 spaceKey =
     32
@@ -42,6 +43,7 @@ initalState =
       , applicationStatus = Started
       , currentPosition = 0
       , mdl = Layout.setTabsWidth 2124 Material.model
+      , currentSeed = initialSeed 0
       }
     , Cmd.batch [timeForInitialSeed, materialInit]
     )
@@ -52,6 +54,9 @@ timeForInitialSeed = Task.perform (\_ -> crash "") (\time -> TimeForInitialSeed 
 materialInit : Cmd Msg
 materialInit = Material.init Mdl
 
+getBoundsTask : String -> Cmd Msg
+getBoundsTask id = Bounds.get id |> Task.perform (\_ -> crash "") (\bounds -> BoundsForElement bounds)
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -60,7 +65,12 @@ update msg model =
             ( model, Cmd.none )
 
         TimeForInitialSeed time ->
-            ( { model | currentWords = fromList (randomWords initalWordNumber (initalSeedFromTime time) []) }, Cmd.none )
+            let
+                randomWordsAndSeed = randomWords initalWordNumber (initalSeedFromTime time) []
+                wordList = fst randomWordsAndSeed
+                resultingSeed = snd randomWordsAndSeed
+            in
+                ( { model | currentWords = fromList wordList, currentSeed = resultingSeed },  getBoundsTask "word-0")
 
         KeyTyped key ->
             let
@@ -86,6 +96,23 @@ update msg model =
           in
               Material.update msg model
 
+        BoundsForElement maybeBounds ->
+            case maybeBounds of
+                Nothing ->
+                    let
+                        nothingLog = log "NOTHING HERE" ""
+                    in
+                        ( model, Cmd.none )
+                Just bound ->
+                    let
+                       boundsLog = log "RECT BOUNDS ARE" bound
+                    in
+                        ( model, Cmd.none )
+
+        GetBounds ->
+            (model, getBoundsTask "word-0")
+
+
 wrapModelInCmd : Model -> (Model, Cmd Msg)
 wrapModelInCmd model = (model, Cmd.none)
 
@@ -94,14 +121,14 @@ updateCurrentTypedWords keycode model =
     ( { model | currentTypedChars = push (fromChar (fromCode keycode)) model.currentTypedChars }, Cmd.none )
 
 
-randomWords : Int -> Seed -> List Word -> List Word
+randomWords : Int -> Seed -> List Word -> (List Word, Seed)
 randomWords num seed acc =
     let
         arrayPosition = step (int 0 (Array.length hardcodedWordRepository - 1)) seed
-        nextWord = createWord (extractText (get (fst arrayPosition) hardcodedWordRepository))
+        nextWord = createWord (extractText (Array.get (fst arrayPosition) hardcodedWordRepository))
     in
         if (List.length acc == num) then
-          acc
+          (acc, (snd arrayPosition))
         else
           randomWords num (snd arrayPosition) (acc ++ [nextWord])
 
@@ -137,7 +164,12 @@ verifyNewWordsNeeded model =
         remainingWordsToEvaluate = Array.length model.currentWords - (model.currentPosition + 1)
     in
         if (remainingWordsToEvaluate == 0) then
-            { model | currentWords = Array.append (fromList []) model.currentWords  }
+            let
+                randomWordsAndSeed = randomWords initalWordNumber model.currentSeed []
+                wordList = fst randomWordsAndSeed
+                resultingSeed = snd randomWordsAndSeed
+            in
+              { model | currentWords = Array.append (fromList wordList) model.currentWords, currentSeed = resultingSeed  }
         else
             model
 

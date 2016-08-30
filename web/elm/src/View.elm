@@ -29,13 +29,16 @@ stylesheet : Model -> Html Msg
 stylesheet model =
   div [ class "root"]
       [ div
-          [ class "typing"]
+          [ class "typing", id "typing"]
           [
               div [] (wordsToHTML (model.currentWords))
             , div [] [ (text (arrayToString model.currentTypedChars)) ]
+            , div [] [button [onClick GetBounds] [text "BOUUUUUUUUNNNNNDSSS"]]
           ]
       ]
 
+-- filterVisibleWords : Array Word -> Array Word
+-- filterVisibleWords words =
 
 wordsToHTML : Array Word -> List (Html.Html Msg)
 wordsToHTML words =

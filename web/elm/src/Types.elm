@@ -4,6 +4,8 @@ import Array exposing (Array)
 import Time exposing (Time)
 import Keyboard
 import Material
+import Random exposing (initialSeed, Seed)
+import Bounds exposing (ClientRect)
 
 type alias Word =
     { text : String
@@ -14,6 +16,8 @@ type alias Word =
 type Msg
     = NoOp
     | TimeForInitialSeed Time
+    | GetBounds
+    | BoundsForElement (Maybe ClientRect)
     | KeyTyped Keyboard.KeyCode
     | Mdl (Material.Msg Msg)
 
@@ -39,5 +43,6 @@ type alias Model =
     , currentTypedChars : Array String
     , applicationStatus : ApplicationStatus
     , currentPosition : Int
+    , currentSeed : Seed
     , mdl : Material.Model
     }
