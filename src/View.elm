@@ -5,62 +5,71 @@ import Html.Attributes exposing (style, class, id)
 import Html.Events exposing (onClick)
 import Array exposing (toList, Array)
 import Types exposing (..)
-
 import Material.Options as Options exposing (css, when)
 import Material
 import Material.Layout as Layout
 import Material.Icon as Icon
+
 
 -- scrolltop : changes the position in the view
 -- getBoundClientRect : gets the boundaries of the view
 
 
 view : Model -> Html Msg
-view model = Layout.render Mdl model.mdl
-    []
-    { drawer = []
-    , tabs = ([], [])
-    , main = [ stylesheet model ]
-    , header = header model
-    }
+view model =
+    Layout.render Mdl
+        model.mdl
+        []
+        { drawer = []
+        , tabs = ( [], [] )
+        , main = [ stylesheet model ]
+        , header = header model
+        }
 
 
 stylesheet : Model -> Html Msg
 stylesheet model =
-  div [ class "root"]
-      [ div
-          [ class "typing", id "typing"]
-          [
-              div [] (wordsToHTML (model.currentWords))
+    div [ class "root" ]
+        [ div
+            [ class "typing", id "typing" ]
+            [ div [] (wordsToHTML (model.currentWords))
             , div [] [ (text (arrayToString model.currentTypedChars)) ]
-            , div [] [button [onClick GetBounds] [text "BOUUUUUUUUNNNNNDSSS"]]
-          ]
-      ]
+            , div [] [ button [ onClick GetBounds ] [ text "BOUUUUUUUUNNNNNDSSS" ] ]
+            ]
+        ]
+
+
 
 -- filterVisibleWords : Array Word -> Array Word
 -- filterVisibleWords words =
 
+
 wordsToHTML : Array Word -> List (Html.Html Msg)
 wordsToHTML words =
-    words |> Array.indexedMap (\idx word -> div
-    [
-        style [ getWordStyle word ]
-      , class "word"
-      , id ("word-" ++ (toString idx))
-    ]
-    [ text word.text ])
-    |> toList
+    words
+        |> Array.indexedMap
+            (\idx word ->
+                div
+                    [ style [ getWordStyle word ]
+                    , class "word"
+                    , id ("word-" ++ (toString idx))
+                    ]
+                    [ text word.text ]
+            )
+        |> toList
 
 
-getWordStyle : Word -> (String, String)
+getWordStyle : Word -> ( String, String )
 getWordStyle word =
     case word.wordStatus of
         Unevaluated ->
-            ("color", "black")
+            ( "color", "black" )
+
         TypedCorrectly ->
-            ("color", "#7FFF00")
+            ( "color", "#7FFF00" )
+
         TypedIncorrectly ->
-            ("color", "red")
+            ( "color", "red" )
 
 
 arrayToString : Array String -> String
@@ -70,11 +79,11 @@ arrayToString array =
 
 header : Model -> List (Html Msg)
 header model =
-  [ Layout.row
-      [ Options.nop
-      , css "transition" "height 333ms ease-in-out 0s"
-      ]
-      [ Layout.title [] [ text "Typing Test" ]
-      , Layout.spacer
-      ]
-  ]
+    [ Layout.row
+        [ Options.nop
+        , css "transition" "height 333ms ease-in-out 0s"
+        ]
+        [ Layout.title [] [ text "Typing Test" ]
+        , Layout.spacer
+        ]
+    ]

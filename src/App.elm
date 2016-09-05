@@ -4,6 +4,7 @@ import State
 import View
 import Html.App
 
+
 main =
     Html.App.program
         { init = State.initalState

@@ -5,6 +5,7 @@ import String
 import Maybe
 import Task exposing (Task)
 
+
 type alias ClientRect =
     { bottom : Float
     , height : Float
@@ -13,6 +14,7 @@ type alias ClientRect =
     , top : Float
     , width : Float
     }
+
 
 get : String -> Task String (Maybe ClientRect)
 get =

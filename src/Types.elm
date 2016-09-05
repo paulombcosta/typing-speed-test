@@ -7,11 +7,13 @@ import Material
 import Random exposing (initialSeed, Seed)
 import Bounds exposing (ClientRect)
 
+
 type alias Word =
     { text : String
     , typedText : String
     , wordStatus : WordStatus
     }
+
 
 type Msg
     = NoOp
