@@ -14,6 +14,7 @@ import Types exposing (..)
 import Material
 import Material.Layout as Layout
 import Bounds exposing (get)
+import Dom.Scroll exposing (..)
 
 
 spaceKey =
@@ -29,7 +30,7 @@ lowerCaseZ =
 
 
 initalWordNumber =
-    40
+    100
 
 
 hardcodedWordRepository : Array String
@@ -126,8 +127,18 @@ update msg model =
                     in
                         ( model, Cmd.none )
 
-        GetBounds ->
-            ( model, getBoundsTask "word-0" )
+        TestScroll ->
+            (model, testScroll)
+
+        OnScrollFinished ->
+            let
+                x = log "OnScrollFinished" ""
+            in
+                (model, Cmd.none)
+
+
+testScroll =
+    Task.perform (\_ -> Debug.crash "") (\_ -> OnScrollFinished) (toY "typing" 25)
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )

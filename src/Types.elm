@@ -18,9 +18,10 @@ type alias Word =
 type Msg
     = NoOp
     | TimeForInitialSeed Time
-    | GetBounds
     | BoundsForElement (Maybe ClientRect)
     | KeyTyped Keyboard.KeyCode
+    | TestScroll
+    | OnScrollFinished
     | Mdl (Material.Msg Msg)
 
 

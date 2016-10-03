@@ -33,16 +33,10 @@ stylesheet model =
         [ div
             [ class "typing", id "typing" ]
             [ div [] (wordsToHTML (model.currentWords))
-            , div [] [ (text (arrayToString model.currentTypedChars)) ]
-            , div [] [ button [ onClick GetBounds ] [ text "BOUUUUUUUUNNNNNDSSS" ] ]
+            , div [] [ text (arrayToString model.currentTypedChars)]
             ]
+        , div [] [button [onClick TestScroll] [text "Test scroll"]]
         ]
-
-
-
--- filterVisibleWords : Array Word -> Array Word
--- filterVisibleWords words =
-
 
 wordsToHTML : Array Word -> List (Html.Html Msg)
 wordsToHTML words =
