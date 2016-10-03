@@ -48,9 +48,8 @@ initalState =
       , mdl = Layout.setTabsWidth 2124 Material.model
       , currentSeed = initialSeed 0
       }
-    , Cmd.batch [ timeForInitialSeed, materialInit ]
+    , Cmd.batch [ timeForInitialSeed, materialInit, getBoundsTask "typing" ]
     )
-
 
 timeForInitialSeed : Cmd Msg
 timeForInitialSeed =
@@ -84,7 +83,7 @@ update msg model =
                 resultingSeed =
                     snd randomWordsAndSeed
             in
-                ( { model | currentWords = fromList wordList, currentSeed = resultingSeed }, getBoundsTask "word-0" )
+                ( { model | currentWords = fromList wordList, currentSeed = resultingSeed }, Cmd.none )
 
         KeyTyped key ->
             let
@@ -194,7 +193,7 @@ updateWordStatus model =
             log "updateWordStatus updatedWord" (createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus)
     in
         { model
-            | currentTypedChars = fromList [ "" ]
+            | currentTypedChars = fromList []
             , currentWords = set model.currentPosition updatedWord model.currentWords
             , currentPosition = model.currentPosition + 1
         }
