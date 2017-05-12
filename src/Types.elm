@@ -3,7 +3,6 @@ module Types exposing (..)
 import Array exposing (Array)
 import Time exposing (Time)
 import Keyboard
-import Material
 import Random exposing (initialSeed, Seed)
 import Bounds exposing (ClientRect)
 
@@ -22,7 +21,6 @@ type Msg
     | KeyTyped Keyboard.KeyCode
     | TestScroll
     | OnScrollFinished
-    | Mdl (Material.Msg Msg)
 
 
 type ApplicationStatus
@@ -47,5 +45,4 @@ type alias Model =
     , applicationStatus : ApplicationStatus
     , currentPosition : Int
     , currentSeed : Seed
-    , mdl : Material.Model
     }

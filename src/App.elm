@@ -2,11 +2,11 @@ module App exposing (..)
 
 import State
 import View
-import Html.App
+import Html
 
 
 main =
-    Html.App.program
+    Html.program
         { init = State.initalState
         , view = View.view
         , update = State.update

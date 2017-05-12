@@ -11,8 +11,6 @@ import Task exposing (perform)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Types exposing (..)
-import Material
-import Material.Layout as Layout
 import Bounds exposing (get)
 import Dom.Scroll exposing (..)
 
@@ -45,25 +43,21 @@ initalState =
       , currentWords = fromList []
       , applicationStatus = Started
       , currentPosition = 0
-      , mdl = Layout.setTabsWidth 2124 Material.model
       , currentSeed = initialSeed 0
       }
-    , Cmd.batch [ timeForInitialSeed, materialInit, getBoundsTask "typing" ]
+    , Cmd.batch [ timeForInitialSeed ]
+    --, Cmd.batch [ timeForInitialSeed, getBoundsTask "typing" ]
     )
+
 
 timeForInitialSeed : Cmd Msg
 timeForInitialSeed =
-    Task.perform (\_ -> crash "") (\time -> TimeForInitialSeed time) Time.now
+    Task.perform (\time -> TimeForInitialSeed time) Time.now
 
 
-materialInit : Cmd Msg
-materialInit =
-    Material.init Mdl
-
-
-getBoundsTask : String -> Cmd Msg
-getBoundsTask id =
-    Bounds.get id |> Task.perform (\_ -> crash "") (\bounds -> BoundsForElement bounds)
+-- getBoundsTask : String -> Cmd Msg
+-- getBoundsTask id =
+--    Bounds.get id |> Task.perform (\bounds -> BoundsForElement bounds)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -78,10 +72,10 @@ update msg model =
                     randomWords initalWordNumber (initalSeedFromTime time) []
 
                 wordList =
-                    fst randomWordsAndSeed
+                    Tuple.first randomWordsAndSeed
 
                 resultingSeed =
-                    snd randomWordsAndSeed
+                    Tuple.second randomWordsAndSeed
             in
                 ( { model | currentWords = fromList wordList, currentSeed = resultingSeed }, Cmd.none )
 
@@ -103,12 +97,6 @@ update msg model =
                 else
                     ( model, Cmd.none )
 
-        Mdl msg ->
-            let
-                materialUpdateLog =
-                    log "Material Update" ""
-            in
-                Material.update msg model
 
         BoundsForElement maybeBounds ->
             case maybeBounds of
@@ -127,17 +115,18 @@ update msg model =
                         ( model, Cmd.none )
 
         TestScroll ->
-            (model, testScroll)
+            ( model, Cmd.none )
 
         OnScrollFinished ->
             let
-                x = log "OnScrollFinished" ""
+                x =
+                    log "OnScrollFinished" ""
             in
-                (model, Cmd.none)
+                ( model, Cmd.none )
 
 
-testScroll =
-    Task.perform (\_ -> Debug.crash "") (\_ -> OnScrollFinished) (toY "typing" 25)
+-- testScroll =
+    -- Task.perform (\_ -> OnScrollFinished) (toY "typing" 25)
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )
@@ -157,12 +146,12 @@ randomWords num seed acc =
             step (int 0 (Array.length hardcodedWordRepository - 1)) seed
 
         nextWord =
-            createWord (extractText (Array.get (fst arrayPosition) hardcodedWordRepository))
+            createWord (extractText (Array.get (Tuple.first arrayPosition) hardcodedWordRepository))
     in
         if (List.length acc == num) then
-            ( acc, (snd arrayPosition) )
+            ( acc, (Tuple.second arrayPosition) )
         else
-            randomWords num (snd arrayPosition) (acc ++ [ nextWord ])
+            randomWords num (Tuple.second arrayPosition) (acc ++ [ nextWord ])
 
 
 createWord : String -> Word
@@ -211,10 +200,10 @@ verifyNewWordsNeeded model =
                     randomWords initalWordNumber model.currentSeed []
 
                 wordList =
-                    fst randomWordsAndSeed
+                    Tuple.first randomWordsAndSeed
 
                 resultingSeed =
-                    snd randomWordsAndSeed
+                    Tuple.second randomWordsAndSeed
             in
                 { model | currentWords = Array.append (fromList wordList) model.currentWords, currentSeed = resultingSeed }
         else
