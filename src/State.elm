@@ -11,7 +11,7 @@ import Task exposing (perform)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Types exposing (..)
-import Bounds exposing (get)
+import Bounds exposing (get, ClientRect)
 import Dom.Scroll exposing (..)
 
 
@@ -45,19 +45,25 @@ initalState =
       , currentPosition = 0
       , currentSeed = initialSeed 0
       }
-    , Cmd.batch [ timeForInitialSeed ]
-    --, Cmd.batch [ timeForInitialSeed, getBoundsTask "typing" ]
+    , Cmd.batch [ timeForInitialSeed, getBoundsTask "typing" ]
     )
 
 
 timeForInitialSeed : Cmd Msg
 timeForInitialSeed =
-    Task.perform (\time -> TimeForInitialSeed time) Time.now
+    Task.perform TimeForInitialSeed Time.now
 
 
--- getBoundsTask : String -> Cmd Msg
--- getBoundsTask id =
---    Bounds.get id |> Task.perform (\bounds -> BoundsForElement bounds)
+getBoundsTask : String -> Cmd Msg
+getBoundsTask id =
+    Bounds.get id |> Task.attempt processBounds
+
+
+processBounds : Result String (Maybe ClientRect) -> Msg
+processBounds result =
+    case result of
+        Ok result -> BoundsForElement result
+        Err _ ->  NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -115,7 +121,7 @@ update msg model =
                         ( model, Cmd.none )
 
         TestScroll ->
-            ( model, Cmd.none )
+            ( model, testScroll )
 
         OnScrollFinished ->
             let
@@ -125,8 +131,11 @@ update msg model =
                 ( model, Cmd.none )
 
 
--- testScroll =
-    -- Task.perform (\_ -> OnScrollFinished) (toY "typing" 25)
+testScroll =
+  Task.attempt (\_ -> OnScrollFinished) (toY "typing" 25)
+
+--processScroll : Result String String -> Msg
+--processScroll
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )
