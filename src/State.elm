@@ -27,7 +27,7 @@ lowerCaseZ =
     122
 
 
-initalWordNumber =
+initialWordNumber =
     100
 
 
@@ -36,8 +36,8 @@ hardcodedWordRepository =
     fromList [ "end", "start", "much", "dark", "better" ]
 
 
-initalState : ( Model, Cmd Msg )
-initalState =
+initialState : ( Model, Cmd Msg )
+initialState =
     ( { evaluatedWords = []
       , currentTypedChars = fromList []
       , currentWords = fromList []
@@ -75,7 +75,7 @@ update msg model =
         TimeForInitialSeed time ->
             let
                 randomWordsAndSeed =
-                    randomWords initalWordNumber (initalSeedFromTime time) []
+                    randomWords initialWordNumber (initialSeedFromTime time) []
 
                 wordList =
                     Tuple.first randomWordsAndSeed
@@ -133,9 +133,6 @@ update msg model =
 
 testScroll =
   Task.attempt (\_ -> OnScrollFinished) (toY "typing" 25)
-
---processScroll : Result String String -> Msg
---processScroll
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )
@@ -206,7 +203,7 @@ verifyNewWordsNeeded model =
         if (remainingWordsToEvaluate == 0) then
             let
                 randomWordsAndSeed =
-                    randomWords initalWordNumber model.currentSeed []
+                    randomWords initialWordNumber model.currentSeed []
 
                 wordList =
                     Tuple.first randomWordsAndSeed
@@ -251,8 +248,8 @@ subscriptions model =
     Keyboard.presses KeyTyped
 
 
-initalSeedFromTime : Time -> Seed
-initalSeedFromTime time =
+initialSeedFromTime : Time -> Seed
+initialSeedFromTime time =
     initialSeed (truncate (inMilliseconds time))
 
 

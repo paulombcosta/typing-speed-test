@@ -7,7 +7,7 @@ import Html
 
 main =
     Html.program
-        { init = State.initalState
+        { init = State.initialState
         , view = View.view
         , update = State.update
         , subscriptions = State.subscriptions
