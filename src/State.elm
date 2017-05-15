@@ -264,7 +264,7 @@ verifyNewWordsNeeded model =
                 resultingSeed =
                     Tuple.second randomWordsAndSeed
             in
-                { model | currentWords = Array.append (fromList wordList) model.currentWords, currentSeed = resultingSeed }
+                { model | currentWords = Array.append model.currentWords (fromList wordList) , currentSeed = resultingSeed }
         else
             model
 
@@ -300,7 +300,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.applicationStatus of
     Started ->
-        Sub.batch [Keyboard.presses KeyTyped, every second Tick]
+        -- Sub.batch [Keyboard.presses KeyTyped, every second Tick]
+        Sub.batch [Keyboard.presses KeyTyped]
     _ -> Sub.none
 
 
