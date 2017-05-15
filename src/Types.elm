@@ -45,4 +45,5 @@ type alias Model =
     , applicationStatus : ApplicationStatus
     , currentPosition : Int
     , currentSeed : Seed
+    , currentBound : ClientRect
     }

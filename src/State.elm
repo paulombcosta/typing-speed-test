@@ -11,7 +11,7 @@ import Task exposing (perform)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Types exposing (..)
-import Bounds exposing (get, ClientRect)
+import Bounds exposing (get, ClientRect, origin)
 import Dom.Scroll exposing (..)
 
 
@@ -44,6 +44,7 @@ initialState =
       , applicationStatus = Started
       , currentPosition = 0
       , currentSeed = initialSeed 0
+      , currentBound = Bounds.origin
       }
     , Cmd.batch [ timeForInitialSeed, getBoundsTask "typing" ]
     )
