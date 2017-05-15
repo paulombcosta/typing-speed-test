@@ -31,6 +31,8 @@ initialWordNumber =
     100
 
 
+lineHeight = 56
+
 hardcodedWordRepository : Array String
 hardcodedWordRepository =
     fromList [ "end", "start", "much", "dark", "better" ]
@@ -45,6 +47,7 @@ initialState =
       , currentPosition = 0
       , currentSeed = initialSeed 0
       , currentBound = Bounds.origin
+      , currentYScroll = 0
       }
     , Cmd.batch [ timeForInitialSeed ]
     )
@@ -116,13 +119,22 @@ update msg model =
 
                 Just bound ->
                     let
+                        newModel = {model | currentBound = bound}
+                        currentYScroll = (model.currentYScroll + lineHeight)
+                        scroll = shouldScroll model.currentBound bound
                         boundsLog =
                             log "Rect bounds are" bound
                     in
-                        ( model, Cmd.none )
+                        if scroll then
+                            ( {model | currentYScroll = currentYScroll}, scrollY currentYScroll )
+                        else
+                            ( newModel, Cmd.none )
 
         TestScroll ->
-            ( model, testScroll )
+            let
+                currentScroll = (model.currentYScroll + 56)
+             in
+                ( {model | currentYScroll = currentScroll}, scrollY currentScroll )
 
         OnScrollFinished ->
             let
@@ -131,9 +143,13 @@ update msg model =
             in
                 ( model, Cmd.none )
 
+shouldScroll : ClientRect -> ClientRect -> Bool
+shouldScroll previousBound currentBound =
+    if previousBound /= Bounds.origin && currentBound.top > previousBound.top then True else False
 
-testScroll =
-  Task.attempt (\_ -> OnScrollFinished) (toY "typing" (154.1875 - 68))
+
+scrollY y =
+  Task.attempt (\_ -> OnScrollFinished) (toY "typing" y)
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )

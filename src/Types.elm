@@ -46,4 +46,5 @@ type alias Model =
     , currentPosition : Int
     , currentSeed : Seed
     , currentBound : ClientRect
+    , currentYScroll : Float
     }

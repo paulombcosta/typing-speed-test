@@ -1,7 +1,7 @@
 /* This file is for your main application css. */
-.root {
-    position: relative;
-}
+/*.root {*/
+    /*position: relative;*/
+/*}*/
 
 html, body, .root, .app-container, #elm-container, #main {
     height: 100%;
@@ -10,24 +10,19 @@ html, body, .root, .app-container, #elm-container, #main {
 }
 
 .typing {
+    height: 200px;
+    width: 600px;
+    overflow: hidden;
+    text-align: justify;
     background-color: white;
     position: absolute;
-    height: 130px;
-    width: 580px;
     margin: 50px 0 0 -200px;
     top: 10%;
     left: 45%;
-    overflow: hidden;
 }
 
-.word {
+.word, .currentWord {
     font-size: 40px;
-    float: left;
-    margin: 12px 8px 10px 8px;
-}
-
-.currentWord {
-    font-size: 40px;
-    float: left;
-    margin: 12px 8px 10px 8px;
+    display: inline-block;
+    margin: 0px 8px 10px 8px;
 }
