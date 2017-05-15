@@ -1,6 +1,6 @@
 module View exposing (..)
 
-import Html exposing (div, Html, text, button, span)
+import Html exposing (div, Html, text, button, span, p)
 import Html.Attributes exposing (style, class, id)
 import Html.Events exposing (onClick)
 import Array exposing (toList, Array, fromList)
@@ -33,7 +33,13 @@ startedApplicationBody model =
             , div [] [ text (arrayToString model.currentTypedChars) ]
             ]
         , div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
+        , div [] [ p [] [ text (timeLeft model) ] ]
         ]
+
+timeLeft : Model -> String
+timeLeft model =
+    model.timeLimitSeconds - model.timePassedSeconds
+    |> toString
 
 finishedApplicationBody : Model -> List (Html.Html Msg)
 finishedApplicationBody model =
