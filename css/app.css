@@ -18,10 +18,12 @@ html, body, .root, .app-container, #elm-container, #main {
     margin: 50px 0 0 -200px;
     top: 10%;
     left: 45%;
+    text-align: center;
+    vertical-align: middle;
 }
 
 .word, .currentWord {
     font-size: 40px;
-    display: inline-block;
+    float: left;
     margin: 0px 8px 10px 8px;
 }
