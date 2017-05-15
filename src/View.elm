@@ -21,6 +21,7 @@ stateSelector : Model -> List (Html.Html Msg)
 stateSelector model =
    case model.applicationStatus of
        Started -> startedApplicationBody model
+       NotStarted -> notStartedApplicationBody model
        Finished -> finishedApplicationBody model
 
 
@@ -38,6 +39,9 @@ finishedApplicationBody : Model -> List (Html.Html Msg)
 finishedApplicationBody model =
     [ div [] [text "We're finished here!"] ]
 
+notStartedApplicationBody : Model -> List (Html.Html Msg)
+notStartedApplicationBody model =
+    [ div [] [text "Not started"] ]
 
 
 wordsToHTML : Model -> List (Html.Html Msg)

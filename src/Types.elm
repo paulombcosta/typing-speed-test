@@ -25,6 +25,7 @@ type Msg
 
 type ApplicationStatus
     = Started
+    | NotStarted
     | Finished
 
 
