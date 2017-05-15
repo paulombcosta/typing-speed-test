@@ -12,7 +12,7 @@ import Char exposing (fromCode)
 import String exposing (fromChar)
 import Types exposing (..)
 import Bounds exposing (get, ClientRect, origin)
-import Dom.Scroll exposing (..)
+import Dom.Scroll exposing (toY)
 
 
 spaceKey =
@@ -48,6 +48,9 @@ initialState =
       , currentSeed = initialSeed 0
       , currentBound = Bounds.origin
       , currentYScroll = 0
+      , lineScrollThreshold = 2
+      , lineScrollAcc = 0
+      , firstLineTyped = False
       }
     , Cmd.batch [ timeForInitialSeed ]
     )
@@ -119,20 +122,32 @@ update msg model =
 
                 Just bound ->
                     let
-                        newModel = {model | currentBound = bound}
-                        currentYScroll = (model.currentYScroll + lineHeight)
-                        scroll = shouldScroll model.currentBound bound
-                        boundsLog =
-                            log "Rect bounds are" bound
+                        lineChanged = checkLineChanged model.currentBound bound
+                        newModel = if lineChanged then
+                            if model.firstLineTyped == False then
+                                {model | currentBound = bound
+                                , lineScrollAcc = model.lineScrollAcc + 1
+                                , firstLineTyped = True
+                                }
+                            else
+                                {model | currentBound = bound
+                                , lineScrollAcc = model.lineScrollAcc + 1
+                                , lineScrollThreshold = 1
+                                }
+                          else
+                            {model | currentBound = bound}
                     in
-                        if scroll then
-                            ( {model | currentYScroll = currentYScroll}, scrollY currentYScroll )
+                        if shouldScroll newModel then
+                            let
+                              currentYScroll = (model.currentYScroll + lineHeight)
+                            in
+                                ( {newModel | lineScrollAcc = 0, currentYScroll = currentYScroll}, scrollY currentYScroll )
                         else
                             ( newModel, Cmd.none )
 
         TestScroll ->
             let
-                currentScroll = (model.currentYScroll + 56)
+                currentScroll = (model.currentYScroll + lineHeight)
              in
                 ( {model | currentYScroll = currentScroll}, scrollY currentScroll )
 
@@ -143,8 +158,13 @@ update msg model =
             in
                 ( model, Cmd.none )
 
-shouldScroll : ClientRect -> ClientRect -> Bool
-shouldScroll previousBound currentBound =
+
+shouldScroll : Model -> Bool
+shouldScroll model =
+    if model.lineScrollAcc >= model.lineScrollThreshold then True else False
+
+checkLineChanged : ClientRect -> ClientRect -> Bool
+checkLineChanged previousBound currentBound =
     if previousBound /= Bounds.origin && currentBound.top > previousBound.top then True else False
 
 
@@ -262,7 +282,7 @@ extractWord maybeWord =
             word
 
         Nothing ->
-            { text = "OOOPS", wordStatus = Unevaluated, typedText = "" }
+            { text = "", wordStatus = Unevaluated, typedText = "" }
 
 
 subscriptions : Model -> Sub Msg

@@ -47,4 +47,7 @@ type alias Model =
     , currentSeed : Seed
     , currentBound : ClientRect
     , currentYScroll : Float
+    , lineScrollThreshold : Int
+    , lineScrollAcc : Int
+    , firstLineTyped : Bool
     }

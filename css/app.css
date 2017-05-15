@@ -10,10 +10,9 @@ html, body, .root, .app-container, #elm-container, #main {
 }
 
 .typing {
-    height: 200px;
-    width: 600px;
+    height: 175px;
+    width: 560px;
     overflow: hidden;
-    text-align: justify;
     background-color: white;
     position: absolute;
     margin: 50px 0 0 -200px;
