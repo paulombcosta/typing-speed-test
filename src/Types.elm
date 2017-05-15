@@ -21,6 +21,7 @@ type Msg
     | KeyTyped Keyboard.KeyCode
     | TestScroll
     | OnScrollFinished
+    | Tick Time
 
 
 type ApplicationStatus
@@ -51,4 +52,6 @@ type alias Model =
     , lineScrollThreshold : Int
     , lineScrollAcc : Int
     , firstLineTyped : Bool
+    , timeLimitSeconds : Int
+    , timePassedSeconds : Int
     }

@@ -6,7 +6,7 @@ import Keyboard
 import Random exposing (Seed, initialSeed, step, int, list)
 import Debug exposing (log, crash)
 import Array exposing (Array, length, get, fromList, toList, push, set, indexedMap)
-import Time exposing (now, inMilliseconds, Time)
+import Time exposing (now, inMilliseconds, Time, every, second)
 import Task exposing (perform)
 import Char exposing (fromCode)
 import String exposing (fromChar)
@@ -51,6 +51,8 @@ initialState =
       , lineScrollThreshold = 2
       , lineScrollAcc = 0
       , firstLineTyped = False
+      , timeLimitSeconds = 60
+      , timePassedSeconds = 0
       }
     , Cmd.batch [ timeForInitialSeed ]
     )
@@ -157,6 +159,12 @@ update msg model =
                     log "OnScrollFinished" ""
             in
                 ( model, Cmd.none )
+
+        Tick time ->
+            if (model.timePassedSeconds + 1) >= model.timeLimitSeconds then
+              ( {model | applicationStatus = Finished }, Cmd.none)
+            else
+              ( {model | timePassedSeconds = model.timePassedSeconds + 1}, Cmd.none )
 
 
 shouldScroll : Model -> Bool
@@ -287,7 +295,7 @@ extractWord maybeWord =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Keyboard.presses KeyTyped
+    Sub.batch [Keyboard.presses KeyTyped, every second Tick]
 
 
 initialSeedFromTime : Time -> Seed
