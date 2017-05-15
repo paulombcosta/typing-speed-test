@@ -295,7 +295,10 @@ extractWord maybeWord =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [Keyboard.presses KeyTyped, every second Tick]
+    case model.applicationStatus of
+    Started ->
+        Sub.batch [Keyboard.presses KeyTyped, every second Tick]
+    _ -> Sub.none
 
 
 initialSeedFromTime : Time -> Seed
