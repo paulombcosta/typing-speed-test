@@ -14,7 +14,18 @@ view model = stylesheet model
 
 stylesheet : Model -> Html Msg
 stylesheet model =
-    div [ class "root" ]
+    div [ class "root" ] (stateSelector model)
+
+
+stateSelector : Model -> List (Html.Html Msg)
+stateSelector model =
+   case model.applicationStatus of
+       Started -> startedApplicationBody model
+       Finished -> finishedApplicationBody model
+
+
+startedApplicationBody : Model -> List (Html.Html Msg)
+startedApplicationBody model =
         [ div
             [ class "typing", id "typing" ]
             [ div [] (wordsToHTML (model))
@@ -22,6 +33,11 @@ stylesheet model =
             ]
         , div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
         ]
+
+finishedApplicationBody : Model -> List (Html.Html Msg)
+finishedApplicationBody model =
+    [ div [] [text "We're finished here!"] ]
+
 
 
 wordsToHTML : Model -> List (Html.Html Msg)
