@@ -46,7 +46,7 @@ initialState =
       , currentSeed = initialSeed 0
       , currentBound = Bounds.origin
       }
-    , Cmd.batch [ timeForInitialSeed, getBoundsTask "typing" ]
+    , Cmd.batch [ timeForInitialSeed ]
     )
 
 
@@ -110,14 +110,14 @@ update msg model =
                 Nothing ->
                     let
                         nothingLog =
-                            log "NOTHING HERE" ""
+                            log "Unable to fetch bounds" ""
                     in
                         ( model, Cmd.none )
 
                 Just bound ->
                     let
                         boundsLog =
-                            log "RECT BOUNDS ARE" bound
+                            log "Rect bounds are" bound
                     in
                         ( model, Cmd.none )
 
@@ -133,12 +133,17 @@ update msg model =
 
 
 testScroll =
-  Task.attempt (\_ -> OnScrollFinished) (toY "typing" 25)
+  Task.attempt (\_ -> OnScrollFinished) (toY "typing" (154.1875 - 68))
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )
 wrapModelInCmd model =
-    ( model, Cmd.none )
+    let
+      currentWordClass = model.currentPosition
+      |> toString
+      |> String.append "word-"
+    in
+    ( model, getBoundsTask currentWordClass)
 
 
 updateCurrentTypedWords : Int -> Model -> ( Model, Cmd Msg )
