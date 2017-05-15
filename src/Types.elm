@@ -22,6 +22,7 @@ type Msg
     | TestScroll
     | OnScrollFinished
     | Tick Time
+    | StartApp
 
 
 type ApplicationStatus

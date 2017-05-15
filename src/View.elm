@@ -43,11 +43,40 @@ timeLeft model =
 
 finishedApplicationBody : Model -> List (Html.Html Msg)
 finishedApplicationBody model =
-    [ div [] [text "We're finished here!"] ]
+    [ div [] [text "We're finished here!"]
+    , p [] [text ("You WPM is " ++ (wpm model)) ]
+    , p [] [text ("You CPM is " ++ (cpm model)) ]
+    ]
+
+-- This assumes that the time of the test was exactly one minute
+wpm : Model -> String
+wpm model =
+    model.currentWords
+    |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
+    |> Array.length
+    |> toFloat
+    |> round
+    |> toString
+
+
+-- This assumes that the time of the test was exactly one minute
+cpm : Model -> String
+cpm model =
+    model.currentWords
+    |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
+    |> Array.map (\w -> String.length w.typedText)
+    |> Array.foldl (+) 0
+    |> toString
+
+
+divideBy60 : Float -> Float
+divideBy60 x = x / 60
 
 notStartedApplicationBody : Model -> List (Html.Html Msg)
 notStartedApplicationBody model =
-    [ div [] [text "Not started"] ]
+    [ div [] [text "Not started"]
+    , button [ onClick StartApp] [text "Start"]
+    ]
 
 
 wordsToHTML : Model -> List (Html.Html Msg)

@@ -43,7 +43,7 @@ initialState =
     ( { evaluatedWords = []
       , currentTypedChars = fromList []
       , currentWords = fromList []
-      , applicationStatus = Started
+      , applicationStatus = NotStarted
       , currentPosition = 0
       , currentSeed = initialSeed 0
       , currentBound = Bounds.origin
@@ -165,6 +165,9 @@ update msg model =
               ( {model | applicationStatus = Finished }, Cmd.none)
             else
               ( {model | timePassedSeconds = model.timePassedSeconds + 1}, Cmd.none )
+
+        StartApp ->
+            ( {model | applicationStatus = Started}, Cmd.none )
 
 
 shouldScroll : Model -> Bool
