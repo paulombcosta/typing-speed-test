@@ -44,7 +44,7 @@ initialState =
     ( { evaluatedWords = []
       , currentTypedChars = fromList []
       , currentWords = fromList []
-      , applicationStatus = Started
+      , applicationStatus = NotStarted
       , currentPosition = 0
       , currentSeed = initialSeed 0
       , currentBound = Bounds.origin
@@ -54,6 +54,8 @@ initialState =
       , firstLineTyped = False
       , timeLimitSeconds = 60
       , timePassedSeconds = 0
+      , currentWPM = 0
+      , currentCPM = 0
       }
     , Cmd.batch [ timeForInitialSeed ]
     )

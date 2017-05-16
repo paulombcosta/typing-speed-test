@@ -55,4 +55,6 @@ type alias Model =
     , firstLineTyped : Bool
     , timeLimitSeconds : Int
     , timePassedSeconds : Int
+    , currentWPM : Int
+    , currentCPM : Int
     }

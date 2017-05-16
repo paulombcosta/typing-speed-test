@@ -27,30 +27,59 @@ p {
     padding: 0;
 }
 
+.stats-container {
+    width: 100%;
+    margin-top: 30px;
+    align-self: flex-start;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.metrics {
+    display: flex;
+    flex-direction: row;
+}
+
+.status-text {
+    font-size: 30px;
+}
+
+.metrics-text {
+    font-size: 30px;
+    margin-top: 10px;
+}
+
+.cpm {
+    margin-top: 20px;
+    margin-left: 50px;
+    font-size: 20px;
+}
+
+.wpm {
+    margin-top: 20px;
+    margin-right: 50px;
+    font-size: 20px;
+}
+
+
 .typing {
-    height: 175px;
-    /*width: 560px;*/
-    max-width: 50%;
+    height: 285px;
+    max-width: 75%;
     overflow: hidden;
     background-color: white;
     margin-top: 50px;
-    /*position: absolute;*/
-    /*margin: 50px 0px;*/
-    /*top: 20%;*/
-    /*left: 45%;*/
-    /*justify-content: center;*/
-    /*align-items: center;*/
-    /*text-align: center;*/
-    /*vertical-align: middle;*/
     border: 2px solid #6A8BE3;
 }
 
-.current-type-chars {
-    display: inline-block;
-    margin: auto;
-    top: 25%;
-    position: absolute;
-    vertical-align: middle;
+.countdown {
+    align-self: center;
+}
+
+.current-typed-chars {
+    margin-top: 10px;
+    font-size: 30px;
 }
 
 .word {
