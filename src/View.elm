@@ -14,39 +14,63 @@ view model = stylesheet model
 
 stylesheet : Model -> Html Msg
 stylesheet model =
-    div [ class "root" ] (stateSelector model)
-
-
-stateSelector : Model -> List (Html.Html Msg)
-stateSelector model =
-   case model.applicationStatus of
-       Started -> startedApplicationBody model
-       NotStarted -> notStartedApplicationBody model
-       Finished -> finishedApplicationBody model
-
-
-startedApplicationBody : Model -> List (Html.Html Msg)
-startedApplicationBody model =
-        [ div
-            [ class "typing", id "typing" ]
-            [ div [] (wordsToHTML (model))
-            , div [] [ text (arrayToString model.currentTypedChars) ]
-            ]
-        , div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
-        , div [] [ p [] [ text (timeLeft model) ] ]
+    div
+        [ class "root" ]
+        [ header
+        , wordsBox model
+        , currentTypedChars model
         ]
+
+
+--stateSelector : Model -> List (Html.Html Msg)
+--stateSelector model =
+--   case model.applicationStatus of
+--       Started -> startedApplicationBody model
+--       NotStarted -> notStartedApplicationBody model
+--       Finished -> finishedApplicationBody model
+
+--notStartedApplicationBody : Model -> List (Html.Html Msg)
+--notStartedApplicationBody model =
+--    [ div [] [text "Not started"]
+--    , button [ onClick StartApp] [text "Start"]
+--    ]
+
+currentTypedChars : Model -> Html.Html Msg
+currentTypedChars model =
+    div [ class "current-typed-chars"] [ text (arrayToString model.currentTypedChars) ]
+
+
+header : Html.Html Msg
+header =
+    div
+        [ class "header" ]
+        [ p [ class "header-text" ] [text "Typing Speed Test" ]]
+
+
+wordsBox : Model -> Html.Html Msg
+wordsBox model =
+     div
+        [ class "typing", id "typing" ]
+        [ div [] (wordsToHTML (model))]
+
+
+testScrollComponent : Html.Html Msg
+testScrollComponent = div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
+
+countdown: Model -> Html.Html Msg
+countdown model = div [] [ p [] [ text (timeLeft model) ] ]
 
 timeLeft : Model -> String
 timeLeft model =
     model.timeLimitSeconds - model.timePassedSeconds
     |> toString
 
-finishedApplicationBody : Model -> List (Html.Html Msg)
-finishedApplicationBody model =
-    [ div [] [text "We're finished here!"]
-    , p [] [text ("You WPM is " ++ (wpm model)) ]
-    , p [] [text ("You CPM is " ++ (cpm model)) ]
-    ]
+--finishedApplicationBody : Model -> List (Html.Html Msg)
+--finishedApplicationBody model =
+--    [ div [] [text "We're finished here!"]
+--    , p [] [text ("You WPM is " ++ (wpm model)) ]
+--    , p [] [text ("You CPM is " ++ (cpm model)) ]
+--    ]
 
 -- This assumes that the time of the test was exactly one minute
 wpm : Model -> String
@@ -71,13 +95,6 @@ cpm model =
 
 divideBy60 : Float -> Float
 divideBy60 x = x / 60
-
-notStartedApplicationBody : Model -> List (Html.Html Msg)
-notStartedApplicationBody model =
-    [ div [] [text "Not started"]
-    , button [ onClick StartApp] [text "Start"]
-    ]
-
 
 wordsToHTML : Model -> List (Html.Html Msg)
 wordsToHTML model =
@@ -154,4 +171,3 @@ getWordStyle word =
 arrayToString : Array String -> String
 arrayToString array =
     Array.foldr (++) "" array
-
