@@ -13,6 +13,7 @@ import String exposing (fromChar)
 import Types exposing (..)
 import Bounds exposing (get, ClientRect, origin)
 import Dom.Scroll exposing (toY)
+import Words exposing (words)
 
 
 spaceKey =
@@ -35,7 +36,7 @@ lineHeight = 56
 
 hardcodedWordRepository : Array String
 hardcodedWordRepository =
-    fromList [ "end", "start", "much", "dark", "better" ]
+    fromList words
 
 
 initialState : ( Model, Cmd Msg )

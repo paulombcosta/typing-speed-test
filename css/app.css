@@ -7,10 +7,19 @@
     box-sizing: border-box;
 }
 
-html, body, .root, .app-container, #elm-container, #main {
+html, body, .app-container, #elm-container, #main {
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+.root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 p {
@@ -20,15 +29,19 @@ p {
 
 .typing {
     height: 175px;
-    width: 560px;
+    /*width: 560px;*/
+    max-width: 50%;
     overflow: hidden;
     background-color: white;
-    position: absolute;
-    margin: 50px 0 0 -200px;
-    top: 20%;
-    left: 45%;
-    text-align: center;
-    vertical-align: middle;
+    margin-top: 50px;
+    /*position: absolute;*/
+    /*margin: 50px 0px;*/
+    /*top: 20%;*/
+    /*left: 45%;*/
+    /*justify-content: center;*/
+    /*align-items: center;*/
+    /*text-align: center;*/
+    /*vertical-align: middle;*/
     border: 2px solid #6A8BE3;
 }
 
@@ -63,6 +76,7 @@ p {
 }
 
 .header {
+    align-self: flex-start;
     height: 50px;
     margin: 0;
     width: 100%;
