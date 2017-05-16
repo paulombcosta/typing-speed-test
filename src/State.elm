@@ -32,7 +32,7 @@ initialWordNumber =
     100
 
 
-lineHeight = 56
+lineHeight = 46
 
 hardcodedWordRepository : Array String
 hardcodedWordRepository =
@@ -57,7 +57,7 @@ initialState =
       , currentWPM = 0
       , currentCPM = 0
       }
-    , Cmd.batch [ timeForInitialSeed ]
+    , Cmd.batch [ timeForInitialSeed, scrollY 0 ]
     )
 
 
@@ -128,6 +128,7 @@ update msg model =
 
                 Just bound ->
                     let
+                        boundLog = log "bounds" bound
                         lineChanged = checkLineChanged model.currentBound bound
                         newModel = if lineChanged then
                             if model.firstLineTyped == False then
@@ -172,6 +173,9 @@ update msg model =
 
         StartApp ->
             ( {model | applicationStatus = Started}, Cmd.none )
+
+        Restart ->
+            initialState
 
 
 shouldScroll : Model -> Bool

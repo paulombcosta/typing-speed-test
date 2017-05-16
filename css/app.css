@@ -96,6 +96,7 @@ p {
 }
 
 .header-text {
+    align-self: flex-start;
     padding-top: 15px;
     padding-left: 10px;
     color: #FFFFFF;
@@ -104,8 +105,29 @@ p {
     letter-spacing: 5px;
 }
 
+
+.restart {
+    background: none;
+    cursor: pointer;
+    border: none;
+    font-size: 18px;
+    padding-bottom: 18px;
+    padding-right: 10px;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.restart:hover {
+    color: darkblue;
+}
+
+.restart:active {
+    color: white;
+}
+
 .header {
-    align-self: flex-start;
+    display: flex;
+    flex-direction: row;
     height: 50px;
     margin: 0;
     width: 100%;

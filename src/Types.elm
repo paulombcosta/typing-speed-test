@@ -23,6 +23,7 @@ type Msg
     | OnScrollFinished
     | Tick Time
     | StartApp
+    | Restart
 
 
 type ApplicationStatus

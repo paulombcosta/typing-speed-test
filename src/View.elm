@@ -1,7 +1,7 @@
 module View exposing (..)
 
-import Html exposing (div, Html, text, button, span, p)
-import Html.Attributes exposing (style, class, id)
+import Html exposing (div, Html, text, button, span, p, input, a)
+import Html.Attributes exposing (style, class, id, classList)
 import Html.Events exposing (onClick)
 import Array exposing (toList, Array, fromList)
 import Types exposing (..)
@@ -36,17 +36,20 @@ stats model =
          ]
         ]
 
+
 getWPM : Model -> String
 getWPM model =
     case model.applicationStatus of
     NotStarted -> "0"
     _ -> wpm model
 
+
 getCPM : Model -> String
 getCPM model =
     case model.applicationStatus of
     NotStarted -> "0"
     _ -> cpm model
+
 
 statusText : Model -> String
 statusText model =
@@ -70,7 +73,11 @@ header : Html Msg
 header =
     div
         [ class "header" ]
-        [ p [ class "header-text" ] [text "Typing Speed Test" ]]
+        [ p [ class "header-text" ] [text "Typing Speed Test" ]
+        , a
+            [ classList [("restart", True), ("header-text", True)], onClick Restart]
+            [ text "restart" ]
+        ]
 
 
 wordsBox : Model -> Html Msg
