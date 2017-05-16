@@ -17,7 +17,9 @@ type alias ClientRect =
 
 
 origin : ClientRect
-origin = {bottom = 0, height = 0, left = 0, right = 0, top = 0, width = 0}
+origin =
+    { bottom = 0, height = 0, left = 0, right = 0, top = 0, width = 0 }
+
 
 get : String -> Task String (Maybe ClientRect)
 get =

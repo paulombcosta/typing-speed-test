@@ -32,7 +32,9 @@ initialWordNumber =
     100
 
 
-lineHeight = 46
+lineHeight =
+    46
+
 
 hardcodedWordRepository : Array String
 hardcodedWordRepository =
@@ -74,8 +76,11 @@ getBoundsTask id =
 processBounds : Result String (Maybe ClientRect) -> Msg
 processBounds result =
     case result of
-        Ok result -> BoundsForElement result
-        Err _ ->  NoOp
+        Ok result ->
+            BoundsForElement result
+
+        Err _ ->
+            NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -99,7 +104,8 @@ update msg model =
 
         KeyTyped key ->
             let
-                newModel = {model | applicationStatus = Started}
+                newModel =
+                    { model | applicationStatus = Started }
             in
                 if (key >= upperCaseA && key <= lowerCaseZ) then
                     updateCurrentTypedWords key newModel
@@ -110,7 +116,6 @@ update msg model =
                 else
                     ( model, Cmd.none )
 
-
         BoundsForElement maybeBounds ->
             case maybeBounds of
                 Nothing ->
@@ -118,46 +123,53 @@ update msg model =
 
                 Just bound ->
                     let
-                        lineChanged = checkLineChanged model.currentBound bound
-                        newModel = if lineChanged then
-                            if model.firstLineTyped == False then
-                                {model | currentBound = bound
-                                , lineScrollAcc = model.lineScrollAcc + 1
-                                , firstLineTyped = True
-                                }
+                        lineChanged =
+                            checkLineChanged model.currentBound bound
+
+                        newModel =
+                            if lineChanged then
+                                if model.firstLineTyped == False then
+                                    { model
+                                        | currentBound = bound
+                                        , lineScrollAcc = model.lineScrollAcc + 1
+                                        , firstLineTyped = True
+                                    }
+                                else
+                                    { model
+                                        | currentBound = bound
+                                        , lineScrollAcc = model.lineScrollAcc + 1
+                                        , lineScrollThreshold = 1
+                                    }
                             else
-                                {model | currentBound = bound
-                                , lineScrollAcc = model.lineScrollAcc + 1
-                                , lineScrollThreshold = 1
-                                }
-                          else
-                            {model | currentBound = bound}
+                                { model | currentBound = bound }
                     in
                         if shouldScroll newModel then
                             let
-                              currentYScroll = (model.currentYScroll + lineHeight)
+                                currentYScroll =
+                                    (model.currentYScroll + lineHeight)
                             in
-                                ( {newModel | lineScrollAcc = 0, currentYScroll = currentYScroll}, scrollY currentYScroll )
+                                ( { newModel | lineScrollAcc = 0, currentYScroll = currentYScroll }, scrollY currentYScroll )
                         else
                             ( newModel, Cmd.none )
 
         TestScroll ->
             let
-                currentScroll = (model.currentYScroll + lineHeight)
-             in
-                ( {model | currentYScroll = currentScroll}, scrollY currentScroll )
+                currentScroll =
+                    (model.currentYScroll + lineHeight)
+            in
+                ( { model | currentYScroll = currentScroll }, scrollY currentScroll )
 
         OnScrollFinished ->
             ( model, Cmd.none )
 
         Tick time ->
             if (model.timePassedSeconds + 1) >= model.timeLimitSeconds then
-              ( {model | applicationStatus = Finished }, Cmd.none)
+                ( { model | applicationStatus = Finished }, Cmd.none )
             else
-              ( {model | timePassedSeconds = model.timePassedSeconds + 1}, Cmd.none )
+                ( { model | timePassedSeconds = model.timePassedSeconds + 1 }, Cmd.none )
 
         StartApp ->
-            ( {model | applicationStatus = Started}, Cmd.none )
+            ( { model | applicationStatus = Started }, Cmd.none )
 
         Restart ->
             initialState
@@ -165,25 +177,33 @@ update msg model =
 
 shouldScroll : Model -> Bool
 shouldScroll model =
-    if model.lineScrollAcc >= model.lineScrollThreshold then True else False
+    if model.lineScrollAcc >= model.lineScrollThreshold then
+        True
+    else
+        False
+
 
 checkLineChanged : ClientRect -> ClientRect -> Bool
 checkLineChanged previousBound currentBound =
-    if previousBound /= Bounds.origin && currentBound.top > previousBound.top then True else False
+    if previousBound /= Bounds.origin && currentBound.top > previousBound.top then
+        True
+    else
+        False
 
 
 scrollY y =
-  Task.attempt (\_ -> OnScrollFinished) (toY "typing" y)
+    Task.attempt (\_ -> OnScrollFinished) (toY "typing" y)
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )
 wrapModelInCmd model =
     let
-      currentWordClass = model.currentPosition
-      |> toString
-      |> String.append "word-"
+        currentWordClass =
+            model.currentPosition
+                |> toString
+                |> String.append "word-"
     in
-    ( model, getBoundsTask currentWordClass)
+        ( model, getBoundsTask currentWordClass )
 
 
 updateCurrentTypedWords : Int -> Model -> ( Model, Cmd Msg )
@@ -224,9 +244,14 @@ extractText maybeWord =
 updateWordStatus : Model -> Model
 updateWordStatus model =
     let
-        currentWord = extractWord (Array.get model.currentPosition model.currentWords)
-        currentWordStatus = resolveWordStatus currentWord.text model.currentTypedChars
-        updatedWord = createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus
+        currentWord =
+            extractWord (Array.get model.currentPosition model.currentWords)
+
+        currentWordStatus =
+            resolveWordStatus currentWord.text model.currentTypedChars
+
+        updatedWord =
+            createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus
     in
         { model
             | currentTypedChars = fromList []
@@ -252,7 +277,7 @@ verifyNewWordsNeeded model =
                 resultingSeed =
                     Tuple.second randomWordsAndSeed
             in
-                { model | currentWords = Array.append model.currentWords (fromList wordList) , currentSeed = resultingSeed }
+                { model | currentWords = Array.append model.currentWords (fromList wordList), currentSeed = resultingSeed }
         else
             model
 
@@ -287,10 +312,14 @@ extractWord maybeWord =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.applicationStatus of
-    Started ->
-        Sub.batch [Keyboard.presses KeyTyped, every second Tick]
-    NotStarted -> Sub.batch [Keyboard.presses KeyTyped]
-    Finished -> Sub.none
+        Started ->
+            Sub.batch [ Keyboard.presses KeyTyped, every second Tick ]
+
+        NotStarted ->
+            Sub.batch [ Keyboard.presses KeyTyped ]
+
+        Finished ->
+            Sub.none
 
 
 initialSeedFromTime : Time -> Seed

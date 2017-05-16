@@ -9,7 +9,8 @@ import String exposing (fromChar)
 
 
 view : Model -> Html Msg
-view model = stylesheet model
+view model =
+    stylesheet model
 
 
 stylesheet : Model -> Html Msg
@@ -25,111 +26,141 @@ stylesheet model =
 
 stats : Model -> Html Msg
 stats model =
-    div [class "stats-container"]
-        [
-         div [class "status"] [p [class "status-text"] [text (statusText model)] ]
-         ,
-         div [class "metrics"]
-         [
-             div [] [p [class "wpm"] [text ("WPM " ++ (getWPM model))]]
-            ,div [] [p [class "cpm"] [text ("CPM " ++ (getCPM model))]]
-         ]
+    div [ class "stats-container" ]
+        [ div [ class "status" ] [ p [ class "status-text" ] [ text (statusText model) ] ]
+        , div [ class "metrics" ]
+            [ div [] [ p [ class "wpm" ] [ text ("WPM " ++ (getWPM model)) ] ]
+            , div [] [ p [ class "cpm" ] [ text ("CPM " ++ (getCPM model)) ] ]
+            ]
         ]
 
 
 getWPM : Model -> String
 getWPM model =
     case model.applicationStatus of
-    NotStarted -> "0"
-    _ -> wpm model
+        NotStarted ->
+            "0"
+
+        _ ->
+            wpm model
 
 
 getCPM : Model -> String
 getCPM model =
     case model.applicationStatus of
-    NotStarted -> "0"
-    _ -> cpm model
+        NotStarted ->
+            "0"
+
+        _ ->
+            cpm model
 
 
 statusText : Model -> String
 statusText model =
     case model.applicationStatus of
-        NotStarted -> "Start typing to start the test"
-        Started -> timeLeft model
-        Finished -> "You're done, press restart to try again!"
+        NotStarted ->
+            "Start typing to start the test"
+
+        Started ->
+            timeLeft model
+
+        Finished ->
+            "You're done, press restart to try again!"
 
 
 currentTypedChars : Model -> Html Msg
 currentTypedChars model =
-    div [ class "current-typed-chars"] [ text (getCurrentTypedWords model) ]
+    div [ class "current-typed-chars" ] [ text (getCurrentTypedWords model) ]
+
 
 getCurrentTypedWords : Model -> String
 getCurrentTypedWords model =
     case model.applicationStatus of
-    NotStarted -> "The word you are typing will appear here"
-    _ -> arrayToString model.currentTypedChars
+        NotStarted ->
+            "The word you are typing will appear here"
+
+        _ ->
+            arrayToString model.currentTypedChars
+
 
 header : Html Msg
 header =
     div
         [ class "header" ]
-        [ p [ class "header-text" ] [text "Typing Speed Test" ]
+        [ p [ class "header-text" ] [ text "Typing Speed Test" ]
         , a
-            [ classList [("restart", True), ("header-text", True)], onClick Restart]
+            [ classList [ ( "restart", True ), ( "header-text", True ) ], onClick Restart ]
             [ text "restart" ]
         ]
 
 
 wordsBox : Model -> Html Msg
 wordsBox model =
-     div
+    div
         [ class "typing", id "typing" ]
-        [ div [] (wordsToHTML (model))]
+        [ div [] (wordsToHTML (model)) ]
 
 
 testScrollComponent : Html Msg
-testScrollComponent = div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
+testScrollComponent =
+    div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
 
 
 timeLeft : Model -> String
 timeLeft model =
-    model.timeLimitSeconds - model.timePassedSeconds
-    |> toString
+    model.timeLimitSeconds
+        - model.timePassedSeconds
+        |> toString
 
 
 wpm : Model -> String
 wpm model =
     model.currentWords
-    |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
-    |> Array.length
-    |> toFloat
-    |> (\x -> approximateWPM x model)
-    |> sanitize
-    |> round
-    |> toString
+        |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
+        |> Array.length
+        |> toFloat
+        |> (\x -> approximateWPM x model)
+        |> sanitize
+        |> round
+        |> toString
+
 
 approximateWPM : Float -> Model -> Float
 approximateWPM x model =
-    if  x <= 0 then 0 else x * 60/(toFloat model.timePassedSeconds)
+    if x <= 0 then
+        0
+    else
+        x * 60 / (toFloat model.timePassedSeconds)
+
 
 sanitize : Float -> Float
-sanitize x = if isInfinite x then 0 else x
+sanitize x =
+    if isInfinite x then
+        0
+    else
+        x
 
--- This assumes that the time of the test was exactly one minute
+
+
 cpm : Model -> String
 cpm model =
     model.currentWords
-    |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
-    |> Array.map (\w -> String.length w.typedText)
-    |> Array.foldl (+) 0
-    |> (\x -> approximateCPM (toFloat x) model)
-    |> sanitize
-    |> round
-    |> toString
+        |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
+        |> Array.map (\w -> String.length w.typedText)
+        |> Array.foldl (+) 0
+        |> (\x -> approximateCPM (toFloat x) model)
+        |> sanitize
+        |> round
+        |> toString
+
 
 approximateCPM : Float -> Model -> Float
 approximateCPM x model =
-    if  x <= 0 then 0 else x * 60/(toFloat model.timePassedSeconds)
+    if x <= 0 then
+        0
+    else
+        x * 60 / (toFloat model.timePassedSeconds)
+
 
 wordsToHTML : Model -> List (Html Msg)
 wordsToHTML model =
