@@ -31,10 +31,22 @@ stats model =
          ,
          div [class "metrics"]
          [
-             div [] [p [class "wpm"] [text "WPM 0"]]
-            ,div [] [p [class "cpm"] [text "CPM 0"]]
+             div [] [p [class "wpm"] [text ("WPM " ++ (getWPM model))]]
+            ,div [] [p [class "cpm"] [text ("CPM " ++ (getCPM model))]]
          ]
         ]
+
+getWPM : Model -> String
+getWPM model =
+    case model.applicationStatus of
+    NotStarted -> "0"
+    _ -> wpm model
+
+getCPM : Model -> String
+getCPM model =
+    case model.applicationStatus of
+    NotStarted -> "0"
+    _ -> cpm model
 
 statusText : Model -> String
 statusText model =
@@ -46,8 +58,13 @@ statusText model =
 
 currentTypedChars : Model -> Html Msg
 currentTypedChars model =
-    div [ class "current-typed-chars"] [ text (arrayToString model.currentTypedChars) ]
+    div [ class "current-typed-chars"] [ text (getCurrentTypedWords model) ]
 
+getCurrentTypedWords : Model -> String
+getCurrentTypedWords model =
+    case model.applicationStatus of
+    NotStarted -> "The word you are typing will appear here"
+    _ -> arrayToString model.currentTypedChars
 
 header : Html Msg
 header =
@@ -66,8 +83,6 @@ wordsBox model =
 testScrollComponent : Html Msg
 testScrollComponent = div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
 
---countdown: Model -> Html Msg
---countdown model = div [] [ p [] [ text (timeLeft model) ] ]
 
 timeLeft : Model -> String
 timeLeft model =
@@ -75,16 +90,23 @@ timeLeft model =
     |> toString
 
 
--- This assumes that the time of the test was exactly one minute
 wpm : Model -> String
 wpm model =
     model.currentWords
     |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
     |> Array.length
     |> toFloat
+    |> (\x -> approximateWPM x model)
+    |> sanitize
     |> round
     |> toString
 
+approximateWPM : Float -> Model -> Float
+approximateWPM x model =
+    if  x <= 0 then 0 else x * 60/(toFloat model.timePassedSeconds)
+
+sanitize : Float -> Float
+sanitize x = if isInfinite x then 0 else x
 
 -- This assumes that the time of the test was exactly one minute
 cpm : Model -> String
@@ -93,11 +115,14 @@ cpm model =
     |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
     |> Array.map (\w -> String.length w.typedText)
     |> Array.foldl (+) 0
+    |> (\x -> approximateCPM (toFloat x) model)
+    |> sanitize
+    |> round
     |> toString
 
-
-divideBy60 : Float -> Float
-divideBy60 x = x / 60
+approximateCPM : Float -> Model -> Float
+approximateCPM x model =
+    if  x <= 0 then 0 else x * 60/(toFloat model.timePassedSeconds)
 
 wordsToHTML : Model -> List (Html Msg)
 wordsToHTML model =
