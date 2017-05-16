@@ -99,17 +99,18 @@ update msg model =
 
         KeyTyped key ->
             let
+                newModel = {model | applicationStatus = Started}
                 keyPressed =
                     log "KeyCode pressed" (toString key)
             in
                 if (key >= upperCaseA && key <= lowerCaseZ) then
-                    updateCurrentTypedWords key model
+                    updateCurrentTypedWords key newModel
                 else if (key == spaceKey) then
                     let
                         modelStatus =
-                            log "Current model after space pressed" model
+                            log "Current model after space pressed" newModel
                     in
-                        updateWordStatus model
+                        updateWordStatus newModel
                             |> verifyNewWordsNeeded
                             |> wrapModelInCmd
                 else
@@ -303,9 +304,9 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.applicationStatus of
     Started ->
-        -- Sub.batch [Keyboard.presses KeyTyped, every second Tick]
-        Sub.batch [Keyboard.presses KeyTyped]
-    _ -> Sub.none
+        Sub.batch [Keyboard.presses KeyTyped, every second Tick]
+    NotStarted -> Sub.batch [Keyboard.presses KeyTyped]
+    Finished -> Sub.none
 
 
 initialSeedFromTime : Time -> Seed
