@@ -100,19 +100,13 @@ update msg model =
         KeyTyped key ->
             let
                 newModel = {model | applicationStatus = Started}
-                keyPressed =
-                    log "KeyCode pressed" (toString key)
             in
                 if (key >= upperCaseA && key <= lowerCaseZ) then
                     updateCurrentTypedWords key newModel
                 else if (key == spaceKey) then
-                    let
-                        modelStatus =
-                            log "Current model after space pressed" newModel
-                    in
-                        updateWordStatus newModel
-                            |> verifyNewWordsNeeded
-                            |> wrapModelInCmd
+                    updateWordStatus newModel
+                        |> verifyNewWordsNeeded
+                        |> wrapModelInCmd
                 else
                     ( model, Cmd.none )
 
@@ -120,15 +114,10 @@ update msg model =
         BoundsForElement maybeBounds ->
             case maybeBounds of
                 Nothing ->
-                    let
-                        nothingLog =
-                            log "Unable to fetch bounds" ""
-                    in
-                        ( model, Cmd.none )
+                    ( model, Cmd.none )
 
                 Just bound ->
                     let
-                        boundLog = log "bounds" bound
                         lineChanged = checkLineChanged model.currentBound bound
                         newModel = if lineChanged then
                             if model.firstLineTyped == False then
@@ -159,11 +148,7 @@ update msg model =
                 ( {model | currentYScroll = currentScroll}, scrollY currentScroll )
 
         OnScrollFinished ->
-            let
-                x =
-                    log "OnScrollFinished" ""
-            in
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
         Tick time ->
             if (model.timePassedSeconds + 1) >= model.timeLimitSeconds then
@@ -239,14 +224,9 @@ extractText maybeWord =
 updateWordStatus : Model -> Model
 updateWordStatus model =
     let
-        currentWord =
-            log "updateWordStatus extractWord = " (extractWord (Array.get model.currentPosition model.currentWords))
-
-        currentWordStatus =
-            log "updateWordStatus currentWordStatus = " (resolveWordStatus currentWord.text model.currentTypedChars)
-
-        updatedWord =
-            log "updateWordStatus updatedWord" (createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus)
+        currentWord = extractWord (Array.get model.currentPosition model.currentWords)
+        currentWordStatus = resolveWordStatus currentWord.text model.currentTypedChars
+        updatedWord = createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus
     in
         { model
             | currentTypedChars = fromList []
