@@ -1,39 +1,37 @@
-var CopyWebpackPlugin = require("copy-webpack-plugin");
+const path = require('path');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
-  // Our initial entry point for the app
   entry: ["./src/index.js"],
-
-  // Where we output files
   output: {
-    path: './dist',
+    path: path.resolve(__dirname, 'dist'),
     filename: 'index.js'
   },
 
   // How do you resolve modules?
   resolve: {
     // Which directories should we pretend are the current directory too?
-    modulesDirectories: ['node_modules'],
+    modules: ['node_modules'],
     // Which file extensions do we know about automatically?
     // i.e. we don't have to specify their extension at require time.
     //
     // - the empty string means we can still specify an extension at require time
     // - js files, duh
     // - elm files
-    extensions: ['', '.js', '.elm']
+    extensions: ['.js', '.elm']
   },
 
   plugins: [
-    new CopyWebpackPlugin([{ from: "./css"  }])
+    new ExtractTextPlugin('app.css')
   ],
 
   module: {
-    loaders: [
+    rules: [
       // We want to output html files from our project in the output directory
       {
         test: /\.html$/,
         exclude: /node_modules/,
-        loader: 'file?name=[name].[ext]'
+        loader: 'file-loader?name=[name].[ext]'
       },
 
       // We want to load our elm files with the `elm-webpack` loader
@@ -42,7 +40,16 @@ module.exports = {
       {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
-        loader: 'elm-hot!elm-webpack'
+        loader: 'elm-hot-loader!elm-webpack-loader'
+      },
+
+      {
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: ['css-loader', 'postcss-loader']
+        }),
+        test: /\.css$/
+        //use: ["style-loader", "css-loader", "postcss-loader"]
       }
 
     ],
