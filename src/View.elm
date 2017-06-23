@@ -98,7 +98,7 @@ wordsBox : Model -> Html Msg
 wordsBox model =
     div
         [ class "typing", id "typing" ]
-        [ div [] (wordsToHTML (model)) ]
+        [ div [ class "words-box"] (wordsToHTML (model)) ]
 
 
 testScrollComponent : Html Msg
