@@ -1,10 +1,9 @@
 module Types exposing (..)
 
 import Array exposing (Array)
-import Time exposing (Time)
-import Keyboard
-import Random exposing (initialSeed, Seed)
-import Bounds exposing (ClientRect)
+import Random exposing (Seed, initialSeed)
+import Time exposing (Posix)
+import Bounds exposing (BoundingClientRect)
 
 
 type alias Word =
@@ -16,12 +15,12 @@ type alias Word =
 
 type Msg
     = NoOp
-    | TimeForInitialSeed Time
-    | BoundsForElement (Maybe ClientRect)
-    | KeyTyped Keyboard.KeyCode
+    | TimeForInitialSeed Posix
+    | SetBoundingClientRect (Maybe BoundingClientRect)
+    | KeyTyped String
     | TestScroll
     | OnScrollFinished
-    | Tick Time
+    | Tick Posix
     | StartApp
     | Restart
 
@@ -49,7 +48,7 @@ type alias Model =
     , applicationStatus : ApplicationStatus
     , currentPosition : Int
     , currentSeed : Seed
-    , currentBound : ClientRect
+    , currentBound : BoundingClientRect
     , currentYScroll : Float
     , lineScrollThreshold : Int
     , lineScrollAcc : Int

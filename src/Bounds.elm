@@ -1,26 +1,19 @@
-module Bounds exposing (get, ClientRect, origin)
+port module Bounds exposing (BoundingClientRect, fetchBoundingClientRect, origin, setBoundingClientRect)
 
-import Native.Bounds
-import String
-import Maybe
+import Browser.Dom exposing (Error, Viewport, getViewportOf)
 import Task exposing (Task)
 
 
-type alias ClientRect =
-    { bottom : Float
-    , height : Float
-    , left : Float
-    , right : Float
-    , top : Float
-    , width : Float
-    }
+type alias BoundingClientRect =
+    { left : Float, top : Float, right : Float, bottom : Float, x : Float, y : Float, width : Float, height : Float }
 
 
-origin : ClientRect
+origin : BoundingClientRect
 origin =
-    { bottom = 0, height = 0, left = 0, right = 0, top = 0, width = 0 }
+    { left = 0, top = 0, right = 0, bottom = 0, x = 0, y = 0, width = 0, height = 0 }
 
 
-get : String -> Task String (Maybe ClientRect)
-get =
-    Native.Bounds.get
+port fetchBoundingClientRect : String -> Cmd msg
+
+
+port setBoundingClientRect : (Maybe BoundingClientRect -> msg) -> Sub msg

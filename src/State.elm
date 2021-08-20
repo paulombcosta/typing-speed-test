@@ -1,18 +1,17 @@
 module State exposing (..)
 
-import Types exposing (..)
-import List exposing (..)
-import Keyboard
-import Random exposing (Seed, initialSeed, step, int, list)
-import Debug exposing (log, crash)
-import Array exposing (Array, length, get, fromList, toList, push, set, indexedMap)
-import Time exposing (now, inMilliseconds, Time, every, second)
-import Task exposing (perform)
+import Array exposing (Array, fromList, get, indexedMap, length, push, set, toList)
+import Bounds exposing (BoundingClientRect, fetchBoundingClientRect, origin, setBoundingClientRect)
+import Browser.Dom as Dom
+import Browser.Events exposing (onKeyPress)
 import Char exposing (fromCode)
-import String exposing (fromChar)
+import Json.Decode as Decode
+import List exposing (..)
+import Random exposing (Seed, initialSeed, int, list, step)
+import String exposing (fromChar, fromInt)
+import Task exposing (perform)
+import Time exposing (Posix, every, now, posixToMillis)
 import Types exposing (..)
-import Bounds exposing (get, ClientRect, origin)
-import Dom.Scroll exposing (toY)
 import Words exposing (words)
 
 
@@ -65,22 +64,12 @@ initialState =
 
 timeForInitialSeed : Cmd Msg
 timeForInitialSeed =
-    Task.perform TimeForInitialSeed Time.now
+    Task.perform TimeForInitialSeed now
 
 
 getBoundsTask : String -> Cmd Msg
 getBoundsTask id =
-    Bounds.get id |> Task.attempt processBounds
-
-
-processBounds : Result String (Maybe ClientRect) -> Msg
-processBounds result =
-    case result of
-        Ok result ->
-            BoundsForElement result
-
-        Err _ ->
-            NoOp
+    fetchBoundingClientRect id
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,64 +89,82 @@ update msg model =
                 resultingSeed =
                     Tuple.second randomWordsAndSeed
             in
-                ( { model | currentWords = fromList wordList, currentSeed = resultingSeed }, Cmd.none )
+            ( { model | currentWords = fromList wordList, currentSeed = resultingSeed }, Cmd.none )
 
         KeyTyped key ->
             let
+                code =
+                    case String.uncons key of
+                        Nothing ->
+                            Nothing
+
+                        Just ( char, str ) ->
+                            Just (Char.toCode char)
+
                 newModel =
                     { model | applicationStatus = Started }
             in
-                if (key >= upperCaseA && key <= lowerCaseZ) then
-                    updateCurrentTypedWords key newModel
-                else if (key == spaceKey) then
-                    updateWordStatus newModel
-                        |> verifyNewWordsNeeded
-                        |> wrapModelInCmd
-                else
-                    ( model, Cmd.none )
-
-        BoundsForElement maybeBounds ->
-            case maybeBounds of
+            case code of
                 Nothing ->
                     ( model, Cmd.none )
 
-                Just bound ->
-                    let
-                        lineChanged =
-                            checkLineChanged model.currentBound bound
+                Just keyCode ->
+                    if keyCode >= upperCaseA && keyCode <= lowerCaseZ then
+                        updateCurrentTypedWords keyCode newModel
 
-                        newModel =
+                    else if keyCode == spaceKey then
+                        updateWordStatus newModel
+                            |> verifyNewWordsNeeded
+                            |> wrapModelInCmd
+
+                    else
+                        ( model, Cmd.none )
+
+        SetBoundingClientRect maybeBounds ->
+            let
+                lineChanged =
+                    checkLineChanged model.currentBound maybeBounds
+
+                newModel =
+                    case maybeBounds of
+                        Nothing ->
+                            model
+
+                        Just bounds ->
                             if lineChanged then
                                 if model.firstLineTyped == False then
                                     { model
-                                        | currentBound = bound
+                                        | currentBound = bounds
                                         , lineScrollAcc = model.lineScrollAcc + 1
                                         , firstLineTyped = True
                                     }
+
                                 else
                                     { model
-                                        | currentBound = bound
+                                        | currentBound = bounds
                                         , lineScrollAcc = model.lineScrollAcc + 1
                                         , lineScrollThreshold = 1
                                     }
+
                             else
-                                { model | currentBound = bound }
-                    in
-                        if shouldScroll newModel then
-                            let
-                                currentYScroll =
-                                    (model.currentYScroll + lineHeight)
-                            in
-                                ( { newModel | lineScrollAcc = 0, currentYScroll = currentYScroll }, scrollY currentYScroll )
-                        else
-                            ( newModel, Cmd.none )
+                                { model | currentBound = bounds }
+            in
+            if shouldScroll newModel then
+                let
+                    currentYScroll =
+                        model.currentYScroll + lineHeight
+                in
+                ( { newModel | lineScrollAcc = 0, currentYScroll = currentYScroll }, scrollY currentYScroll )
+
+            else
+                ( newModel, Cmd.none )
 
         TestScroll ->
             let
                 currentScroll =
-                    (model.currentYScroll + lineHeight)
+                    model.currentYScroll + lineHeight
             in
-                ( { model | currentYScroll = currentScroll }, scrollY currentScroll )
+            ( { model | currentYScroll = currentScroll }, scrollY currentScroll )
 
         OnScrollFinished ->
             ( model, Cmd.none )
@@ -165,6 +172,7 @@ update msg model =
         Tick time ->
             if (model.timePassedSeconds + 1) >= model.timeLimitSeconds then
                 ( { model | applicationStatus = Finished }, Cmd.none )
+
             else
                 ( { model | timePassedSeconds = model.timePassedSeconds + 1 }, Cmd.none )
 
@@ -179,20 +187,28 @@ shouldScroll : Model -> Bool
 shouldScroll model =
     if model.lineScrollAcc >= model.lineScrollThreshold then
         True
+
     else
         False
 
 
-checkLineChanged : ClientRect -> ClientRect -> Bool
-checkLineChanged previousBound currentBound =
-    if previousBound /= Bounds.origin && currentBound.top > previousBound.top then
-        True
-    else
-        False
+checkLineChanged : BoundingClientRect -> Maybe BoundingClientRect -> Bool
+checkLineChanged previousViewport currentViewport =
+    case currentViewport of
+        Nothing ->
+            False
+
+        Just current ->
+            if previousViewport /= Bounds.origin && current.top > previousViewport.top then
+                True
+
+            else
+                False
 
 
 scrollY y =
-    Task.attempt (\_ -> OnScrollFinished) (toY "typing" y)
+    -- Task.attempt (\_ -> OnScrollFinished) (toY "typing" y)
+    Task.attempt (\_ -> OnScrollFinished) (Dom.setViewportOf "typing" 0 y)
 
 
 wrapModelInCmd : Model -> ( Model, Cmd Msg )
@@ -200,10 +216,10 @@ wrapModelInCmd model =
     let
         currentWordClass =
             model.currentPosition
-                |> toString
+                |> fromInt
                 |> String.append "word-"
     in
-        ( model, getBoundsTask currentWordClass )
+    ( model, getBoundsTask currentWordClass )
 
 
 updateCurrentTypedWords : Int -> Model -> ( Model, Cmd Msg )
@@ -220,10 +236,11 @@ randomWords num seed acc =
         nextWord =
             createWord (extractText (Array.get (Tuple.first arrayPosition) hardcodedWordRepository))
     in
-        if (List.length acc == num) then
-            ( acc, (Tuple.second arrayPosition) )
-        else
-            randomWords num (Tuple.second arrayPosition) (acc ++ [ nextWord ])
+    if List.length acc == num then
+        ( acc, Tuple.second arrayPosition )
+
+    else
+        randomWords num (Tuple.second arrayPosition) (acc ++ [ nextWord ])
 
 
 createWord : String -> Word
@@ -253,11 +270,11 @@ updateWordStatus model =
         updatedWord =
             createWordWithUpdatedStatus currentWord model.currentTypedChars currentWordStatus
     in
-        { model
-            | currentTypedChars = fromList []
-            , currentWords = set model.currentPosition updatedWord model.currentWords
-            , currentPosition = model.currentPosition + 1
-        }
+    { model
+        | currentTypedChars = fromList []
+        , currentWords = set model.currentPosition updatedWord model.currentWords
+        , currentPosition = model.currentPosition + 1
+    }
 
 
 verifyNewWordsNeeded : Model -> Model
@@ -266,20 +283,21 @@ verifyNewWordsNeeded model =
         remainingWordsToEvaluate =
             Array.length model.currentWords - (model.currentPosition + 1)
     in
-        if (remainingWordsToEvaluate == 0) then
-            let
-                randomWordsAndSeed =
-                    randomWords initialWordNumber model.currentSeed []
+    if remainingWordsToEvaluate == 0 then
+        let
+            randomWordsAndSeed =
+                randomWords initialWordNumber model.currentSeed []
 
-                wordList =
-                    Tuple.first randomWordsAndSeed
+            wordList =
+                Tuple.first randomWordsAndSeed
 
-                resultingSeed =
-                    Tuple.second randomWordsAndSeed
-            in
-                { model | currentWords = Array.append model.currentWords (fromList wordList), currentSeed = resultingSeed }
-        else
-            model
+            resultingSeed =
+                Tuple.second randomWordsAndSeed
+        in
+        { model | currentWords = Array.append model.currentWords (fromList wordList), currentSeed = resultingSeed }
+
+    else
+        model
 
 
 resolveWordStatus : String -> Array String -> WordStatus
@@ -288,10 +306,11 @@ resolveWordStatus originalText typedTextArray =
         typedTextString =
             arrayToString typedTextArray
     in
-        if (originalText == typedTextString) then
-            TypedCorrectly
-        else
-            TypedIncorrectly
+    if originalText == typedTextString then
+        TypedCorrectly
+
+    else
+        TypedIncorrectly
 
 
 createWordWithUpdatedStatus : Word -> Array String -> WordStatus -> Word
@@ -309,22 +328,32 @@ extractWord maybeWord =
             { text = "", wordStatus = Unevaluated, typedText = "" }
 
 
+second : Float
+second =
+    1000
+
+
+keyDecoder : Decode.Decoder Msg
+keyDecoder =
+    Decode.map (\value -> KeyTyped value) (Decode.field "key" Decode.string)
+
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.applicationStatus of
         Started ->
-            Sub.batch [ Keyboard.presses KeyTyped, every second Tick ]
+            Sub.batch [ onKeyPress keyDecoder, every second Tick, setBoundingClientRect SetBoundingClientRect ]
 
         NotStarted ->
-            Sub.batch [ Keyboard.presses KeyTyped ]
+            Sub.batch [ onKeyPress keyDecoder ]
 
         Finished ->
             Sub.none
 
 
-initialSeedFromTime : Time -> Seed
+initialSeedFromTime : Posix -> Seed
 initialSeedFromTime time =
-    initialSeed (truncate (inMilliseconds time))
+    initialSeed <| posixToMillis time
 
 
 arrayToString : Array String -> String

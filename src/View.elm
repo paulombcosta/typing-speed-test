@@ -1,11 +1,11 @@
 module View exposing (..)
 
-import Html exposing (div, Html, text, button, span, p, input, a)
-import Html.Attributes exposing (style, class, id, classList)
+import Array exposing (Array, fromList, toList)
+import Html exposing (Attribute, Html, a, button, div, input, p, span, text)
+import Html.Attributes exposing (class, classList, id, style)
 import Html.Events exposing (onClick)
-import Array exposing (toList, Array, fromList)
+import String exposing (fromChar, fromInt)
 import Types exposing (..)
-import String exposing (fromChar)
 
 
 view : Model -> Html Msg
@@ -29,8 +29,8 @@ stats model =
     div [ class "stats-container" ]
         [ div [ class "status" ] [ p [ class "status-text" ] [ text (statusText model) ] ]
         , div [ class "metrics" ]
-            [ div [] [ p [ class "wpm" ] [ text ("WPM " ++ (getWPM model)) ] ]
-            , div [] [ p [ class "cpm" ] [ text ("CPM " ++ (getCPM model)) ] ]
+            [ div [] [ p [ class "wpm" ] [ text ("WPM " ++ getWPM model) ] ]
+            , div [] [ p [ class "cpm" ] [ text ("CPM " ++ getCPM model) ] ]
             ]
         ]
 
@@ -98,7 +98,7 @@ wordsBox : Model -> Html Msg
 wordsBox model =
     div
         [ class "typing", id "typing" ]
-        [ div [ class "words-box"] (wordsToHTML (model)) ]
+        [ div [ class "words-box" ] (wordsToHTML model) ]
 
 
 testScrollComponent : Html Msg
@@ -110,7 +110,7 @@ timeLeft : Model -> String
 timeLeft model =
     model.timeLimitSeconds
         - model.timePassedSeconds
-        |> toString
+        |> fromInt
 
 
 wpm : Model -> String
@@ -122,24 +122,25 @@ wpm model =
         |> (\x -> approximateWPM x model)
         |> sanitize
         |> round
-        |> toString
+        |> fromInt
 
 
 approximateWPM : Float -> Model -> Float
 approximateWPM x model =
     if x <= 0 then
         0
+
     else
-        x * 60 / (toFloat model.timePassedSeconds)
+        x * 60 / toFloat model.timePassedSeconds
 
 
 sanitize : Float -> Float
 sanitize x =
     if isInfinite x then
         0
+
     else
         x
-
 
 
 cpm : Model -> String
@@ -151,15 +152,16 @@ cpm model =
         |> (\x -> approximateCPM (toFloat x) model)
         |> sanitize
         |> round
-        |> toString
+        |> fromInt
 
 
 approximateCPM : Float -> Model -> Float
 approximateCPM x model =
     if x <= 0 then
         0
+
     else
-        x * 60 / (toFloat model.timePassedSeconds)
+        x * 60 / toFloat model.timePassedSeconds
 
 
 wordsToHTML : Model -> List (Html Msg)
@@ -171,24 +173,25 @@ wordsToHTML model =
         currentPosition =
             model.currentPosition
     in
-        words
-            |> Array.indexedMap
-                (\idx word ->
-                    if (idx == currentPosition) then
-                        div
-                            [ class "currentWord"
-                            , id ("word-" ++ (toString idx))
-                            ]
-                            (currentWordProgress model.currentTypedChars word)
-                    else
-                        div
-                            [ style [ getWordStyle word ]
-                            , class "word"
-                            , id ("word-" ++ (toString idx))
-                            ]
-                            [ text word.text ]
-                )
-            |> toList
+    words
+        |> Array.indexedMap
+            (\idx word ->
+                if idx == currentPosition then
+                    div
+                        [ class "currentWord"
+                        , id ("word-" ++ fromInt idx)
+                        ]
+                        (currentWordProgress model.currentTypedChars word)
+
+                else
+                    div
+                        [ getWordStyle word
+                        , class "word"
+                        , id ("word-" ++ fromInt idx)
+                        ]
+                        [ text word.text ]
+            )
+        |> toList
 
 
 currentWordProgress : Array String -> Word -> List (Html Msg)
@@ -198,40 +201,41 @@ currentWordProgress currentTypedWords word =
             word.text |> String.toList |> List.map (\x -> fromChar x)
 
         currentWordArray =
-            fromList (wordTextAsList)
+            fromList wordTextAsList
     in
-        currentWordArray
-            |> Array.indexedMap
-                (\idx char ->
-                    spanForCurrentWord (Array.get idx currentTypedWords) char
-                )
-            |> toList
+    currentWordArray
+        |> Array.indexedMap
+            (\idx char ->
+                spanForCurrentWord (Array.get idx currentTypedWords) char
+            )
+        |> toList
 
 
 spanForCurrentWord : Maybe String -> String -> Html Msg
 spanForCurrentWord typedChar expectedChar =
-    case (typedChar) of
+    case typedChar of
         Nothing ->
             span [] [ text expectedChar ]
 
         Just c ->
-            if (expectedChar == c) then
-                span [ style [ ( "color", "#7FFF00" ) ] ] [ text expectedChar ]
+            if expectedChar == c then
+                span [ style "color" "#7FFF00" ] [ text expectedChar ]
+
             else
-                span [ style [ ( "color", "red" ) ] ] [ text expectedChar ]
+                span [ style "color" "red" ] [ text expectedChar ]
 
 
-getWordStyle : Word -> ( String, String )
+getWordStyle : Word -> Attribute Msg
 getWordStyle word =
     case word.wordStatus of
         Unevaluated ->
-            ( "color", "black" )
+            style "color" "black"
 
         TypedCorrectly ->
-            ( "color", "#7FFF00" )
+            style "color" "#7FFF00"
 
         TypedIncorrectly ->
-            ( "color", "red" )
+            style "color" "red"
 
 
 arrayToString : Array String -> String
