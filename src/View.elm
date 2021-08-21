@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Array exposing (Array, fromList, toList)
-import Html exposing (Attribute, Html, a, button, div, input, p, span, text)
+import Html exposing (Attribute, Html, a, button, div, p, span, text)
 import Html.Attributes exposing (class, classList, id, style)
 import Html.Events exposing (onClick)
 import String exposing (fromChar, fromInt)

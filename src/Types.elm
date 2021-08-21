@@ -1,9 +1,9 @@
 module Types exposing (..)
 
 import Array exposing (Array)
-import Random exposing (Seed, initialSeed)
-import Time exposing (Posix)
 import Bounds exposing (BoundingClientRect)
+import Random exposing (Seed)
+import Time exposing (Posix)
 
 
 type alias Word =

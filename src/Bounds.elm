@@ -1,8 +1,5 @@
 port module Bounds exposing (BoundingClientRect, fetchBoundingClientRect, origin, setBoundingClientRect)
 
-import Browser.Dom exposing (Error, Viewport, getViewportOf)
-import Task exposing (Task)
-
 
 type alias BoundingClientRect =
     { left : Float, top : Float, right : Float, bottom : Float, x : Float, y : Float, width : Float, height : Float }

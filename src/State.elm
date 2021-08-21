@@ -1,15 +1,15 @@
 module State exposing (..)
 
-import Array exposing (Array, fromList, get, indexedMap, length, push, set, toList)
-import Bounds exposing (BoundingClientRect, fetchBoundingClientRect, origin, setBoundingClientRect)
+import Array exposing (Array, fromList, push, set)
+import Bounds exposing (BoundingClientRect, fetchBoundingClientRect, setBoundingClientRect)
 import Browser.Dom as Dom
 import Browser.Events exposing (onKeyPress)
 import Char exposing (fromCode)
 import Json.Decode as Decode
 import List exposing (..)
-import Random exposing (Seed, initialSeed, int, list, step)
+import Random exposing (Seed, initialSeed, int, step)
 import String exposing (fromChar, fromInt)
-import Task exposing (perform)
+import Task
 import Time exposing (Posix, every, now, posixToMillis)
 import Types exposing (..)
 import Words exposing (words)
@@ -53,7 +53,7 @@ initialState =
       , lineScrollThreshold = 2
       , lineScrollAcc = 0
       , firstLineTyped = False
-      , timeLimitSeconds = 60
+      , timeLimitSeconds = 30
       , timePassedSeconds = 0
       , currentWPM = 0
       , currentCPM = 0
@@ -93,13 +93,9 @@ update msg model =
 
         KeyTyped key ->
             let
-                code =
-                    case String.uncons key of
-                        Nothing ->
-                            Nothing
-
-                        Just ( char, str ) ->
-                            Just (Char.toCode char)
+                code = String.uncons key
+                    |> Maybe.map (\x -> Tuple.first x)
+                    |> Maybe.map Char.toCode
 
                 newModel =
                     { model | applicationStatus = Started }
@@ -207,7 +203,6 @@ checkLineChanged previousViewport currentViewport =
 
 
 scrollY y =
-    -- Task.attempt (\_ -> OnScrollFinished) (toY "typing" y)
     Task.attempt (\_ -> OnScrollFinished) (Dom.setViewportOf "typing" 0 y)
 
 
