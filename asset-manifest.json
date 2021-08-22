@@ -1,0 +1,15 @@
+{
+  "main.css": "/typing-speed-test/static/css/main.4057af5e.chunk.css",
+  "main.js": "/typing-speed-test/static/js/main.51072866.chunk.js",
+  "main.js.map": "/typing-speed-test/static/js/main.51072866.chunk.js.map",
+  "runtime~main.js": "/typing-speed-test/static/js/runtime~main.aebeec76.js",
+  "runtime~main.js.map": "/typing-speed-test/static/js/runtime~main.aebeec76.js.map",
+  "vendors~main.js": "/typing-speed-test/static/js/vendors~main.0b49ec49.chunk.js",
+  "vendors~main.js.map": "/typing-speed-test/static/js/vendors~main.0b49ec49.chunk.js.map",
+  "./service-worker.js": "/typing-speed-test/./service-worker.js",
+  "favicon.ico": "/typing-speed-test/favicon.ico",
+  "index.html": "/typing-speed-test/index.html",
+  "logo.svg": "/typing-speed-test/logo.svg",
+  "manifest.json": "/typing-speed-test/manifest.json",
+  "precache-manifest.e54d47afe0d9fb95ec0619d8be6416b6.js": "/typing-speed-test/precache-manifest.e54d47afe0d9fb95ec0619d8be6416b6.js"
+}
