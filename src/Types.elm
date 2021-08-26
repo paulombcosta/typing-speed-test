@@ -45,6 +45,11 @@ colors =
     , red = rgb255 255 0 0
     , white = rgb255 255 255 255
     , blue = rgb255 106 139 227
+    , darkBg = rgb255 50 52 55
+    , wordCorrect = rgb255 209 208 197
+    , wordDefault = rgb255 100 102 105
+    , wordErr = rgb255 202 71 84
+    , caretColor = rgb255 226 183 20
     }
 
 

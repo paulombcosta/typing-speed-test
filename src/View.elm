@@ -7,7 +7,9 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
+import Element.Input as Input
 import Html exposing (Html)
+import Html.Attributes exposing (class)
 import String exposing (fromChar, fromInt)
 import Types exposing (..)
 
@@ -19,13 +21,17 @@ view model =
 
 stylesheet : Model -> Html Msg
 stylesheet model =
-    layout [] <|
-        column [ width fill, spacingXY 0 20 ]
-            [ header
-            , stats model
-            , wordsBox model
-            , currentTypedChars model
+    layout [ Background.color colors.darkBg ] <|
+        column [ width fill, height (px 800) ]
+            [ title
+            , wordsCanvas model
+            , restartIcon
             ]
+
+
+title : Element Msg
+title =
+    el [] <| Element.text "typing test"
 
 
 
@@ -150,9 +156,9 @@ wpm model =
         |> fromInt
 
 
-wordsBox : Model -> Element Msg
-wordsBox model =
-    column [ centerX, paddingXY 0 60 ] <| rows model
+wordsCanvas : Model -> Element Msg
+wordsCanvas model =
+    column [ centerX, centerY ] <| rows model
 
 
 rows : Model -> List (Element Msg)
@@ -166,7 +172,7 @@ wordsRow rowIndex model words =
     words
         |> Array.indexedMap (\idx w -> wordToElem w model rowIndex idx)
         |> toList
-        |> row []
+        |> row [ Font.size 24 ]
 
 
 wordToElem : Word -> Model -> Int -> Int -> Element Msg
@@ -183,20 +189,20 @@ wordToElem word model rowIndex wordIndex =
         currentWordProgress model.currentTypedChars word
 
     else
-        el [ Font.color (getWordColor word), padding 5 ] <| text word.text
+        el [ Font.color (getWordColor word), padding 7 ] <| text word.text
 
 
 getWordColor : Word -> Color
 getWordColor w =
     case w.wordStatus of
         Unevaluated ->
-            colors.black
+            colors.wordDefault
 
         TypedCorrectly ->
-            colors.green
+            colors.wordCorrect
 
         TypedIncorrectly ->
-            colors.red
+            colors.wordErr
 
 
 currentWordProgress : Array String -> Word -> Element Msg
@@ -209,27 +215,51 @@ currentWordProgress currentTypedWords word =
             wordTextAsList
                 |> fromList
                 |> Array.indexedMap (\idx char -> elemForCurrentWord (Array.get idx currentTypedWords) char)
+                |> attachCursor currentTypedWords
                 |> toList
     in
     row
-        [ Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
-        , Border.color colors.blue
-        ]
+        [ padding 7 ]
         elems
+
+
+attachCursor : Array String -> Array (Element Msg) -> Array (Element Msg)
+attachCursor typedWords elems =
+    let
+        lenTyped =
+            Array.length typedWords
+        lenTotal = Array.length elems
+    in
+    if lenTyped == 0 then
+        Array.append (Array.fromList [ cursor ]) elems
+
+    else if lenTyped == Array.length elems then
+        Array.push cursor elems
+
+    else
+        Array.slice 0 lenTyped elems
+        |> Array.push cursor
+        -- |> Array.append (Array.slice (lenTyped + 1) (lenTotal + 1) elems)
+        |> (\a -> Array.append a (Array.slice (lenTyped) (lenTotal + 1) elems))
+
+
+cursor : Element Msg
+cursor =
+    el [ height (px 30), width (px 2), Background.color colors.caretColor ] <| Element.none
 
 
 elemForCurrentWord : Maybe String -> String -> Element Msg
 elemForCurrentWord typedChar expectedChar =
     case typedChar of
         Nothing ->
-            Element.text expectedChar
+            el [ Font.color colors.wordDefault ] <| Element.text expectedChar
 
         Just c ->
             if expectedChar == c then
-                el [ Font.color colors.green ] <| Element.text expectedChar
+                el [ Font.color colors.wordCorrect ] <| Element.text expectedChar
 
             else
-                el [ Font.color colors.red ] <| Element.text expectedChar
+                el [ Font.color colors.wordErr ] <| Element.text expectedChar
 
 
 currentTypedChars : Model -> Element Msg
@@ -246,3 +276,10 @@ getCurrentTypedWords model =
         _ ->
             model.currentTypedChars
                 |> Array.foldr (++) ""
+
+
+restartIcon : Element Msg
+restartIcon =
+    Html.i [ class "material-icons" ] [ Html.text "replay" ]
+        |> Element.html
+        |> el [ Events.onClick Restart, Element.pointer, centerX, centerY, Font.color colors.wordDefault, paddingXY 0 20 ]

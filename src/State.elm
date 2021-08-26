@@ -153,13 +153,8 @@ createWord wordText =
 
 
 extractText : Maybe String -> String
-extractText maybeWord =
-    case maybeWord of
-        Just w ->
-            w
-
-        Nothing ->
-            ""
+extractText word =
+    Maybe.withDefault "" word
 
 
 updateWordStatus : Model -> Model
