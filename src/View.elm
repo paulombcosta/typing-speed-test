@@ -23,19 +23,20 @@ stylesheet : Model -> Html Msg
 stylesheet model =
     layout [ Background.color colors.darkBg ] <|
         column [ width fill, height (px 800) ]
-            [ title
+            [ countdown model
             , wordsCanvas model
             , restartIcon
             ]
 
 
-title : Element Msg
-title =
-    el [] <| Element.text "typing test"
+countdown : Model -> Element Msg
+countdown model =
+    case model.applicationStatus of
+        Started ->
+            el [ centerX, centerY, Font.color colors.mainColor ] <| Element.text <| timeLeft model
 
-
-
----- HEADER ----
+        _ ->
+            el [ centerX, centerY, Font.color colors.mainColor ] <| Element.text <| String.fromInt model.timeLimitSeconds
 
 
 header : Element Msg
@@ -48,10 +49,6 @@ header =
         [ el [ alignLeft, Font.color colors.white ] <| Element.text "Typing Speed Test"
         , el [ alignRight, Font.color colors.white, Events.onClick Restart ] <| Element.text "restart"
         ]
-
-
-
----- STATS ----
 
 
 stats : Model -> Element Msg
@@ -228,7 +225,9 @@ attachCursor typedWords elems =
     let
         lenTyped =
             Array.length typedWords
-        lenTotal = Array.length elems
+
+        lenTotal =
+            Array.length elems
     in
     if lenTyped == 0 then
         Array.append (Array.fromList [ cursor ]) elems
@@ -238,14 +237,13 @@ attachCursor typedWords elems =
 
     else
         Array.slice 0 lenTyped elems
-        |> Array.push cursor
-        -- |> Array.append (Array.slice (lenTyped + 1) (lenTotal + 1) elems)
-        |> (\a -> Array.append a (Array.slice (lenTyped) (lenTotal + 1) elems))
+            |> Array.push cursor
+            |> (\a -> Array.append a (Array.slice lenTyped (lenTotal + 1) elems))
 
 
 cursor : Element Msg
 cursor =
-    el [ height (px 30), width (px 2), Background.color colors.caretColor ] <| Element.none
+    el [ height (px 30), width (px 2), Background.color colors.mainColor ] <| Element.none
 
 
 elemForCurrentWord : Maybe String -> String -> Element Msg

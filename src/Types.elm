@@ -49,7 +49,7 @@ colors =
     , wordCorrect = rgb255 209 208 197
     , wordDefault = rgb255 100 102 105
     , wordErr = rgb255 202 71 84
-    , caretColor = rgb255 226 183 20
+    , mainColor = rgb255 226 183 20
     }
 
 
