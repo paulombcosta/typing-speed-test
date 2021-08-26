@@ -1,9 +1,13 @@
 module View exposing (..)
 
 import Array exposing (Array, fromList, toList)
-import Html exposing (Attribute, Html, a, button, div, p, span, text)
-import Html.Attributes exposing (class, classList, id, style)
-import Html.Events exposing (onClick)
+import Dict
+import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Events as Events
+import Element.Font as Font
+import Html exposing (Html)
 import String exposing (fromChar, fromInt)
 import Types exposing (..)
 
@@ -15,24 +19,64 @@ view model =
 
 stylesheet : Model -> Html Msg
 stylesheet model =
-    div
-        [ class "root" ]
-        [ header
-        , stats model
-        , wordsBox model
-        , currentTypedChars model
+    layout [] <|
+        column [ width fill, spacingXY 0 20 ]
+            [ header
+            , stats model
+            , wordsBox model
+            , currentTypedChars model
+            ]
+
+
+
+---- HEADER ----
+
+
+header : Element Msg
+header =
+    row
+        [ width fill
+        , paddingXY 60 10
+        , Background.color colors.blue
+        ]
+        [ el [ alignLeft, Font.color colors.white ] <| Element.text "Typing Speed Test"
+        , el [ alignRight, Font.color colors.white, Events.onClick Restart ] <| Element.text "restart"
         ]
 
 
-stats : Model -> Html Msg
+
+---- STATS ----
+
+
+stats : Model -> Element Msg
 stats model =
-    div [ class "stats-container" ]
-        [ div [ class "status" ] [ p [ class "status-text" ] [ text (statusText model) ] ]
-        , div [ class "metrics" ]
-            [ div [] [ p [ class "wpm" ] [ text ("WPM " ++ getWPM model) ] ]
-            , div [] [ p [ class "cpm" ] [ text ("CPM " ++ getCPM model) ] ]
+    column [ width fill, spacing 30 ]
+        [ el [ centerX, Font.size 30 ] <| Element.text <| statusText model
+        , row [ centerX, spacing 30 ]
+            [ el [ Font.size 30 ] <| Element.text ("WPM " ++ getWPM model)
+            , el [ Font.size 30 ] <| Element.text ("CPM " ++ getCPM model)
             ]
         ]
+
+
+statusText : Model -> String
+statusText model =
+    case model.applicationStatus of
+        NotStarted ->
+            "Start typing to start the test"
+
+        Started ->
+            timeLeft model
+
+        Finished ->
+            "You're done, press restart to try again!"
+
+
+timeLeft : Model -> String
+timeLeft model =
+    model.timeLimitSeconds
+        - model.timePassedSeconds
+        |> fromInt
 
 
 getWPM : Model -> String
@@ -55,74 +99,25 @@ getCPM model =
             cpm model
 
 
-statusText : Model -> String
-statusText model =
-    case model.applicationStatus of
-        NotStarted ->
-            "Start typing to start the test"
-
-        Started ->
-            timeLeft model
-
-        Finished ->
-            "You're done, press restart to try again!"
-
-
-currentTypedChars : Model -> Html Msg
-currentTypedChars model =
-    div [ class "current-typed-chars" ] [ text (getCurrentTypedWords model) ]
-
-
-getCurrentTypedWords : Model -> String
-getCurrentTypedWords model =
-    case model.applicationStatus of
-        NotStarted ->
-            "The word you are typing will appear here"
-
-        _ ->
-            arrayToString model.currentTypedChars
-
-
-header : Html Msg
-header =
-    div
-        [ class "header" ]
-        [ p [ class "header-text" ] [ text "Typing Speed Test" ]
-        , a
-            [ classList [ ( "restart", True ), ( "header-text", True ) ], onClick Restart ]
-            [ text "restart" ]
-        ]
-
-
-wordsBox : Model -> Html Msg
-wordsBox model =
-    div
-        [ class "typing", id "typing" ]
-        [ div [ class "words-box" ] (wordsToHTML model) ]
-
-
-testScrollComponent : Html Msg
-testScrollComponent =
-    div [] [ button [ onClick TestScroll ] [ text "Test scroll" ] ]
-
-
-timeLeft : Model -> String
-timeLeft model =
-    model.timeLimitSeconds
-        - model.timePassedSeconds
-        |> fromInt
-
-
-wpm : Model -> String
-wpm model =
-    model.currentWords
-        |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
-        |> Array.length
-        |> toFloat
-        |> (\x -> approximateWPM x model)
+cpm : Model -> String
+cpm model =
+    model.evaluatedWords
+        |> List.filter (\w -> w.wordStatus == TypedCorrectly)
+        |> List.map (\w -> String.length w.typedText)
+        |> List.foldl (+) 0
+        |> (\x -> approximateCPM (toFloat x) model)
         |> sanitize
         |> round
         |> fromInt
+
+
+approximateCPM : Float -> Model -> Float
+approximateCPM x model =
+    if x <= 0 then
+        0
+
+    else
+        x * 60 / toFloat model.timePassedSeconds
 
 
 approximateWPM : Float -> Model -> Float
@@ -143,101 +138,111 @@ sanitize x =
         x
 
 
-cpm : Model -> String
-cpm model =
-    model.currentWords
-        |> Array.filter (\w -> w.wordStatus == TypedCorrectly)
-        |> Array.map (\w -> String.length w.typedText)
-        |> Array.foldl (+) 0
-        |> (\x -> approximateCPM (toFloat x) model)
+wpm : Model -> String
+wpm model =
+    model.evaluatedWords
+        |> List.filter (\w -> w.wordStatus == TypedCorrectly)
+        |> List.length
+        |> toFloat
+        |> (\x -> approximateWPM x model)
         |> sanitize
         |> round
         |> fromInt
 
 
-approximateCPM : Float -> Model -> Float
-approximateCPM x model =
-    if x <= 0 then
-        0
+wordsBox : Model -> Element Msg
+wordsBox model =
+    column [ centerX, paddingXY 0 60 ] <| rows model
+
+
+rows : Model -> List (Element Msg)
+rows model =
+    Dict.toList model.rows
+        |> List.map (\x -> wordsRow (Tuple.first x) model (Tuple.second x))
+
+
+wordsRow : Int -> Model -> Array Word -> Element Msg
+wordsRow rowIndex model words =
+    words
+        |> Array.indexedMap (\idx w -> wordToElem w model rowIndex idx)
+        |> toList
+        |> row []
+
+
+wordToElem : Word -> Model -> Int -> Int -> Element Msg
+wordToElem word model rowIndex wordIndex =
+    let
+        currentWordIndex =
+            model.currentWordIndex
+
+        currentRowIdx =
+            model.currentRowIndex
+    in
+    -- The current word being typed right now
+    if rowIndex == currentRowIdx && wordIndex == currentWordIndex then
+        currentWordProgress model.currentTypedChars word
 
     else
-        x * 60 / toFloat model.timePassedSeconds
+        el [ Font.color (getWordColor word), padding 5 ] <| text word.text
 
 
-wordsToHTML : Model -> List (Html Msg)
-wordsToHTML model =
-    let
-        words =
-            model.currentWords
+getWordColor : Word -> Color
+getWordColor w =
+    case w.wordStatus of
+        Unevaluated ->
+            colors.black
 
-        currentPosition =
-            model.currentPosition
-    in
-    words
-        |> Array.indexedMap
-            (\idx word ->
-                if idx == currentPosition then
-                    div
-                        [ class "currentWord"
-                        , id ("word-" ++ fromInt idx)
-                        ]
-                        (currentWordProgress model.currentTypedChars word)
+        TypedCorrectly ->
+            colors.green
 
-                else
-                    div
-                        [ getWordStyle word
-                        , class "word"
-                        , id ("word-" ++ fromInt idx)
-                        ]
-                        [ text word.text ]
-            )
-        |> toList
+        TypedIncorrectly ->
+            colors.red
 
 
-currentWordProgress : Array String -> Word -> List (Html Msg)
+currentWordProgress : Array String -> Word -> Element Msg
 currentWordProgress currentTypedWords word =
     let
         wordTextAsList =
-            word.text |> String.toList |> List.map (\x -> fromChar x)
+            word.text |> String.toList |> List.map fromChar
 
-        currentWordArray =
-            fromList wordTextAsList
+        elems =
+            wordTextAsList
+                |> fromList
+                |> Array.indexedMap (\idx char -> elemForCurrentWord (Array.get idx currentTypedWords) char)
+                |> toList
     in
-    currentWordArray
-        |> Array.indexedMap
-            (\idx char ->
-                spanForCurrentWord (Array.get idx currentTypedWords) char
-            )
-        |> toList
+    row
+        [ Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+        , Border.color colors.blue
+        ]
+        elems
 
 
-spanForCurrentWord : Maybe String -> String -> Html Msg
-spanForCurrentWord typedChar expectedChar =
+elemForCurrentWord : Maybe String -> String -> Element Msg
+elemForCurrentWord typedChar expectedChar =
     case typedChar of
         Nothing ->
-            span [] [ text expectedChar ]
+            Element.text expectedChar
 
         Just c ->
             if expectedChar == c then
-                span [ style "color" "#7FFF00" ] [ text expectedChar ]
+                el [ Font.color colors.green ] <| Element.text expectedChar
 
             else
-                span [ style "color" "red" ] [ text expectedChar ]
+                el [ Font.color colors.red ] <| Element.text expectedChar
 
 
-getWordStyle : Word -> Attribute Msg
-getWordStyle word =
-    case word.wordStatus of
-        Unevaluated ->
-            style "color" "black"
-
-        TypedCorrectly ->
-            style "color" "#7FFF00"
-
-        TypedIncorrectly ->
-            style "color" "red"
+currentTypedChars : Model -> Element Msg
+currentTypedChars model =
+    el [ centerX, centerY ] <| Element.text (getCurrentTypedWords model)
 
 
-arrayToString : Array String -> String
-arrayToString array =
-    Array.foldr (++) "" array
+getCurrentTypedWords : Model -> String
+getCurrentTypedWords model =
+    case model.applicationStatus of
+        NotStarted ->
+            "The word you are typing will appear here"
+
+        _ ->
+            model.currentTypedChars
+                |> Array.foldr (++) ""
