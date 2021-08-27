@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/typing-speed-test/precache-manifest.e54d47afe0d9fb95ec0619d8be6416b6.js"
+  "/typing-speed-test/precache-manifest.b2dbb762a356e73f204a3ec740391603.js"
 );
 
 workbox.core.skipWaiting();
