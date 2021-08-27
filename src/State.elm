@@ -40,7 +40,6 @@ initialState =
     ( { currentTypedChars = fromList []
       , applicationStatus = NotStarted
       , currentSeed = initialSeed 0
-      , firstLineTyped = False
       , timeLimitSeconds = 30
       , timePassedSeconds = 0
       , currentWPM = 0

@@ -4,10 +4,8 @@ import Array exposing (Array, fromList, toList)
 import Dict
 import Element exposing (..)
 import Element.Background as Background
-import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
-import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes exposing (class)
 import String exposing (fromChar, fromInt)
@@ -26,6 +24,7 @@ stylesheet model =
             [ countdown model
             , wordsCanvas model
             , restartIcon
+            , stats model
             ]
 
 
@@ -39,40 +38,29 @@ countdown model =
             el [ centerX, centerY, Font.color colors.mainColor ] <| Element.text <| String.fromInt model.timeLimitSeconds
 
 
-header : Element Msg
-header =
-    row
-        [ width fill
-        , paddingXY 60 10
-        , Background.color colors.blue
-        ]
-        [ el [ alignLeft, Font.color colors.white ] <| Element.text "Typing Speed Test"
-        , el [ alignRight, Font.color colors.white, Events.onClick Restart ] <| Element.text "restart"
-        ]
-
-
 stats : Model -> Element Msg
 stats model =
-    column [ width fill, spacing 30 ]
-        [ el [ centerX, Font.size 30 ] <| Element.text <| statusText model
-        , row [ centerX, spacing 30 ]
-            [ el [ Font.size 30 ] <| Element.text ("WPM " ++ getWPM model)
-            , el [ Font.size 30 ] <| Element.text ("CPM " ++ getCPM model)
+    if model.applicationStatus == Finished then
+        column [ width fill, spacing 30 ]
+            [ el [ centerX, Font.size 24, Font.color colors.wordCorrect ] <| Element.text <| statusText model
+            , row [ centerX, spacing 30 ]
+                [ row [] [ el [ Font.size 24, Font.color colors.wordDefault ] <| Element.text "WPM: ", el [ Font.size 24, Font.color colors.mainColor ] <| Element.text <| getWPM model ]
+                , row [] [ el [ Font.size 24, Font.color colors.wordDefault ] <| Element.text "CPM: ", el [ Font.size 24, Font.color colors.mainColor ] <| Element.text <| getCPM model ]
+                ]
             ]
-        ]
+
+    else
+        Element.none
 
 
 statusText : Model -> String
 statusText model =
     case model.applicationStatus of
-        NotStarted ->
-            "Start typing to start the test"
-
-        Started ->
-            timeLeft model
-
         Finished ->
-            "You're done, press restart to try again!"
+            "Test finished. Your stats: "
+
+        _ ->
+            ""
 
 
 timeLeft : Model -> String

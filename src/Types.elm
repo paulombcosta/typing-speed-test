@@ -57,7 +57,6 @@ type alias Model =
     { currentTypedChars : Array String
     , applicationStatus : ApplicationStatus
     , currentSeed : Seed
-    , firstLineTyped : Bool
     , timeLimitSeconds : Int
     , timePassedSeconds : Int
     , currentWPM : Int
